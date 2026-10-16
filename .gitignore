@@ -1,0 +1,22 @@
+# Dependencias
+packages/backend/node_modules
+packages/frontend/node_modules
+
+# Variables de entorno y secretos
+.env
+.env.local
+.env.*.local
+
+# IDE y OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs y artefactos de build
+npm-debug.log*
+yarn-error.log*
+frontend/dist
+packages/backend/build
