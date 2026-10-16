@@ -1,18 +1,14 @@
-import { Evento } from './Evento.js'
+import { ValidationError } from '../errors/ValidationError.js';
 
 export class Usuario {
-    constructor({ nombre, apellido, favoritos }) {
+    constructor({ nombre, apellido }) {
         if(!nombre || !apellido){
-            throw new Error("El nombre y el apellido son obligatorios");
-        }
-
-        if(!Array.isArray(favoritos) || favoritos.some(evento => !(evento instanceof Evento))){
-            throw new Error('Los favoritos deben ser un array de instancias de la clase Evento');
+            throw new ValidationError("El nombre y el apellido son obligatorios");
         }
 
         this.nombre = nombre;
         this.apellido = apellido;
-        this.favoritos = favoritos;
+        this.favoritos = [];
     }
 
     agregarFavorito(evento){

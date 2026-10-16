@@ -1,7 +1,9 @@
+import { ValidationError } from '../errors/ValidationError.js';
+
 export class TipoEntrada {
     constructor({ nombre, descripcion, precio, cupo }) {
         if(!nombre || !descripcion || !precio || !cupo) {
-            throw new Error("El tipo de entrada debe incluir el nombre, descripcion, precio y el cupo");
+            throw new ValidationError("El tipo de entrada debe incluir el nombre, descripcion, precio y el cupo");
         }
 
         this.nombre = nombre;

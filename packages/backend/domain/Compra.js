@@ -3,27 +3,28 @@ import { Evento } from './Evento.js';
 import { TipoEntrada } from './TipoEntrada.js';
 import { Mensaje } from './Mensaje.js'
 import { EstadoCompra } from './EstadoCompra.js';
+import { ValidationError } from '../errors/ValidationError.js';
 
 export class Compra {
     constructor({ comprador, evento, tipoEntrada, cantidad, total, estado, mensajes }) {
         if(!comprador || !(comprador instanceof Usuario)) {
-            throw new Error("La persona que realiza la compra debe ser una instancia de la clase Usuario");
+            throw new ValidationError("La persona que realiza la compra debe ser una instancia de la clase Usuario");
         }
 
         if(!evento || !(evento instanceof Evento)){
-            throw new Error("El evento debe ser una instancia de la clase Evento");
+            throw new ValidationError("El evento debe ser una instancia de la clase Evento");
         }
 
         if(!tipoEntrada || !(tipoEntrada instanceof TipoEntrada)){
-            throw new Error("El tipo de entrada debe ser una instancia de la clase TipoEntrada");
+            throw new ValidationError("El tipo de entrada debe ser una instancia de la clase TipoEntrada");
         }
 
         if(!Array.isArray(mensajes) || mensajes.some(mensaje => !(mensaje instanceof Mensaje))) {
-            throw new Error('Los mensajes deben ser un array de instancias de la clase Mensaje');
+            throw new ValidationError('Los mensajes deben ser un array de instancias de la clase Mensaje');
         }
 
         if (!Object.values(EstadoCompra).includes(estado)) {
-            throw new Error(`El estado debe ser uno de los siguientes: ${Object.values(EstadoCompra).join(', ')}`);
+            throw new ValidationError(`El estado debe ser uno de los siguientes: ${Object.values(EstadoCompra).join(', ')}`);
         }
 
         this.comprador = comprador;
