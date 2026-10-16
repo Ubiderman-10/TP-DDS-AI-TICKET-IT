@@ -14,4 +14,12 @@ export class Usuario {
         this.apellido = apellido;
         this.favoritos = favoritos;
     }
+
+    agregarFavorito(evento){
+        this.favoritos.push(evento);
+    }
+
+    removerFavorito(evento){
+        this.favoritos = this.favoritos.filter((favorito) => favorito !== evento);
+    }
 }

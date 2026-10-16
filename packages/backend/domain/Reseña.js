@@ -11,6 +11,10 @@ export class Reseña {
             throw new Error("El evento debe ser una instancia de la clase Evento");
         }
 
+        if(!Number.isInteger(puntuacion) || puntuacion < 1 || puntuacion > 5) {
+            throw new Error("La puntuacion debe ser un numero entero entre 1 y 5 inclusive");
+        }
+
         this.comprador = comprador;
         this.evento = evento;
         this.detalle = detalle;

@@ -1,13 +1,6 @@
 import { Compra } from './Compra.js';
 import { Usuario } from './Usuario.js';
-
-export const EstadoCompra = Object.freeze({
-    PENDIENTE: 'Pendiente',
-    CONFIRMADA: 'Confirmada',
-    UTILIZADA: 'Utilizada',
-    CANCELADA: 'Cancelada',
-    REEMBOLSADA: 'Reembolsada'
-});
+import { EstadoCompra } from './EstadoCompra.js';
 
 export class CambioEstadoCompra {
     constructor({ compra, estado, quien, fechaHora }) {

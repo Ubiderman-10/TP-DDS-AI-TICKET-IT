@@ -38,6 +38,15 @@ export class Evento {
     }
 
     tuPrecioEstaEntre(minimo, maximo) {
-        
+        const precios = this.tiposEntrada.map((tipo) => tipo.precio);
+        if (precios.length === 0) {
+            return false;
+        }
+        const precioMinimo = Math.min(...precios);
+        return precioMinimo >= minimo && precioMinimo <= maximo;
+    }
+
+    yaOcurrio(fechaActual) {
+        return this.fecha < fechaActual;
     }
 }

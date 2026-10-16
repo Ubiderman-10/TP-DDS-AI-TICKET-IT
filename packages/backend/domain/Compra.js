@@ -2,14 +2,7 @@ import { Usuario } from './Usuario.js';
 import { Evento } from './Evento.js';
 import { TipoEntrada } from './TipoEntrada.js';
 import { Mensaje } from './Mensaje.js'
-
-export const EstadoCompra = Object.freeze({
-    PENDIENTE: 'Pendiente',
-    CONFIRMADA: 'Confirmada',
-    UTILIZADA: 'Utilizada',
-    CANCELADA: 'Cancelada',
-    REEMBOLSADA: 'Reembolsada'
-});
+import { EstadoCompra } from './EstadoCompra.js';
 
 export class Compra {
     constructor({ comprador, evento, tipoEntrada, cantidad, total, estado, mensajes }) {
@@ -39,9 +32,18 @@ export class Compra {
         this.cantidad = cantidad;
         this.total = total;
         this.estado = estado;
+        this.mensajes = mensajes;
     }
 
     actualizarEstado(estadoCompra){
-        
+        this.estado = estadoCompra;
+    }
+
+    puedeSerCancelada(fechaActual = new Date()) {
+        return this.estado !== EstadoCompra.UTILIZADA && !this.evento.yaOcurrio(fechaActual);
+    }
+
+    agregarMensaje(mensaje) {
+        this.mensajes.push(mensaje);
     }
 }
