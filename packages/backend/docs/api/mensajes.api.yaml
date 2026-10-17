@@ -28,6 +28,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Mensaje'
+        '404':
+          description: Compra no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /compras/{compraId}/mensajes:
     post:
       summary: Enviar mensaje en una compra
@@ -52,8 +64,34 @@ paths:
       responses:
         '201':
           description: Mensaje enviado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '400':
+          description: texto faltante o vacío.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: No tienes permiso para enviar mensajes en esta compra.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Compra no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /compras/{compraId}/mensajes/{mensajeId}/responder:
     post:
       summary: Responder un mensaje
@@ -83,8 +121,34 @@ paths:
       responses:
         '201':
           description: Mensaje de respuesta enviado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
         '400':
-          description: No se puede responder un mensaje ya cerrado.
+          description: texto faltante o vacío.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Solo el organizador puede responder mensajes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Compra o mensaje no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Mensaje:
@@ -108,3 +172,21 @@ components:
         respondeA:
           type: integer
           description: ID del mensaje al que responde (opcional)
+    Error:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: texto es requerido
+        code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - NOT_FOUND
+            - CONFLICT
+            - FORBIDDEN
+            - INTERNAL_ERROR
+          example: VALIDATION_ERROR

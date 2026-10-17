@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: API - Compras
   version: 1.0.0
-  description: Compras en la plataforma. Incluye estado de compra, cupos disponibles, confirmaci�n y reembolso.
+  description: Compras en la plataforma. Incluye estado de compra, cupos disponibles, confirmaci�n y reembolso.
 servers:
   - url: http://localhost:3000/api
     description: Servidor local de desarrollo
@@ -39,9 +39,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/Compra'
         '400':
-          description: Error de validaci�n o cupo insuficiente.
+          description: Error de validación (campos faltantes o cantidad inválida).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
-          description: Recurso no encontrado.
+          description: Comprador, evento o tipo de entrada no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Cupo insuficiente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /compras/{compraId}/confirmar:
     put:
       summary: Confirmar compra
@@ -65,9 +85,51 @@ paths:
                   example: 1
       responses:
         '200':
-          description: Estado actualizado.
+          description: Estado actualizado a CONFIRMADA.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  estado:
+                    type: string
+                    example: CONFIRMADA
+                  mensaje:
+                    type: string
+                    example: Compra confirmada
         '400':
-          description: No se puede confirmar.
+          description: usuarioId faltante.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: El usuario no es el comprador de la compra.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Compra no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: La compra ya está confirmada o no se puede confirmar.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /compras/{compraId}/utilizar:
     put:
       summary: Marcar compra como utilizada
@@ -91,7 +153,51 @@ paths:
                   example: 1
       responses:
         '200':
-          description: Estado actualizado.
+          description: Estado actualizado a UTILIZADA.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  estado:
+                    type: string
+                    example: UTILIZADA
+                  mensaje:
+                    type: string
+                    example: Compra marcada como utilizada
+        '400':
+          description: usuarioId faltante.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: El usuario no es el comprador de la compra.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Compra no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: La compra no está en estado CONFIRMADA.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /compras/{compraId}/cancelar:
     put:
       summary: Cancelar compra y preparar reembolso
@@ -115,9 +221,51 @@ paths:
                   example: 1
       responses:
         '200':
-          description: Compra cancelada.
+          description: Estado actualizado a CANCELADA.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  estado:
+                    type: string
+                    example: CANCELADA
+                  mensaje:
+                    type: string
+                    example: Compra cancelada
         '400':
-          description: La compra no puede cancelarse.
+          description: usuarioId faltante.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Solo el comprador puede cancelar la compra.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Compra no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: La compra ya está UTILIZADA o el evento ya pasó.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /compras/{compraId}/reembolsar:
     put:
       summary: Reembolsar compra
@@ -143,7 +291,7 @@ paths:
         '200':
           description: Estado actualizado.
         '400':
-          description: El reembolso no es v�lido.
+          description: El reembolso no es v�lido.
   /compras/{compraId}/historial:
     get:
       summary: Historial de cambios de estado de una compra

@@ -30,3 +30,21 @@ components:
         - FORBIDDEN
         - CONFLICT
         - INTERNAL_ERROR
+    Error:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: nombre y descripcion son requeridos
+        code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - NOT_FOUND
+            - CONFLICT
+            - FORBIDDEN
+            - INTERNAL_ERROR
+          example: VALIDATION_ERROR

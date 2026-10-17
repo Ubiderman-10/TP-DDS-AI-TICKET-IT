@@ -51,7 +51,17 @@ paths:
                     items:
                       type: integer
         '400':
-          description: Datos inválidos.
+          description: Datos inválidos (nombre o apellido faltantes).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /usuarios/{usuarioId}/favoritos:
     post:
       summary: Agregar un evento a favoritos
@@ -77,8 +87,42 @@ paths:
       responses:
         '200':
           description: Favorito agregado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  nombre:
+                    type: string
+                    example: Ana
+                  apellido:
+                    type: string
+                    example: Pérez
+                  favoritos:
+                    type: array
+                    items:
+                      type: integer
+        '400':
+          description: eventoId faltante o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Usuario o evento no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /usuarios/{usuarioId}/compras:
     get:
       summary: Listar las compras de un usuario
@@ -101,7 +145,17 @@ paths:
                 items:
                   $ref: '#/components/schemas/Compra'
         '404':
-          description: Usuario no encontrado
+          description: Usuario no encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Usuario:
@@ -120,3 +174,21 @@ components:
           type: array
           items:
             type: integer
+    Error:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: nombre y apellido son requeridos
+        code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - NOT_FOUND
+            - CONFLICT
+            - FORBIDDEN
+            - INTERNAL_ERROR
+          example: VALIDATION_ERROR

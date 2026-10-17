@@ -21,6 +21,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Categoria'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     post:
       summary: Crear categoría
       tags:
@@ -34,8 +40,22 @@ paths:
       responses:
         '201':
           description: Creado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Categoria'
         '400':
-          description: Datos inválidos.
+          description: Datos inválidos (nombre o descripcion faltantes).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Categoria:
@@ -50,3 +70,21 @@ components:
         descripcion:
           type: string
           example: Eventos musicales
+    Error:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: nombre y descripcion son requeridos
+        code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - NOT_FOUND
+            - CONFLICT
+            - FORBIDDEN
+            - INTERNAL_ERROR
+          example: VALIDATION_ERROR
