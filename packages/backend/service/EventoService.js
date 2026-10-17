@@ -1,4 +1,5 @@
 import { Evento } from '../domain/Evento.js';
+import { TipoEntrada } from '../domain/TipoEntrada.js';
 import { NotFoundError } from '../errors/NotFoundError.js';
 
 export class EventoService {
@@ -19,7 +20,8 @@ export class EventoService {
         if (!categoria) {
             throw new NotFoundError('Categoria no encontrada');
         }
-        const evento = new Evento({ ...datos, categoria: categoria, organizador: organizador, tiposEntrada });
+        const tipos = (tiposEntrada || []).map((t) => new TipoEntrada(t));
+        const evento = new Evento({ ...datos, categoria: categoria, organizador: organizador, tiposEntrada: tipos });
         this.eventoRepository.save(evento);
         return evento;
     }
