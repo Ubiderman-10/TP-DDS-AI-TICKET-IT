@@ -1,8 +1,5 @@
 import { Router } from 'express';
 
-/**
- * Rutas de compras y su chat. Se monta en /compras.
- */
 export function createCompraRouter(compraController, mensajeController) {
     const router = Router();
 

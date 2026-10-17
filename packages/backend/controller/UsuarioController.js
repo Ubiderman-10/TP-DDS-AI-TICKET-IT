@@ -1,9 +1,3 @@
-/**
- * Capa: CONTROLLER.
- * Adapta HTTP <-> UsuarioService: extrae parametros, llama al service
- * y responde JSON plano. Sin logica de negocio.
- * Errores -> next(err) para el middleware errorHandler.
- */
 export class UsuarioController {
     constructor(usuarioService) {
         this.usuarioService = usuarioService;

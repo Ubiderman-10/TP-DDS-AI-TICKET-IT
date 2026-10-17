@@ -73,4 +73,13 @@ export class EventoService {
     getEventosOrganizador(organizadorId) {
         return this.eventoRepository.getAll().filter((e) => e.organizador.id === organizadorId);
     }
+
+    // Detalle de un evento por id.
+    obtenerPorId(id) {
+        const evento = this.eventoRepository.getById(id);
+        if (!evento) {
+            throw new NotFoundError('Evento no encontrado');
+        }
+        return evento;
+    }
 }

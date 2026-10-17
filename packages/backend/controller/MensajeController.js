@@ -1,8 +1,3 @@
-/**
- * Capa: CONTROLLER.
- * Adapta HTTP <-> MensajeService (chat de una compra). Sin logica de negocio.
- * Errores -> next(err) para el middleware errorHandler.
- */
 export class MensajeController {
     constructor(mensajeService) {
         this.mensajeService = mensajeService;

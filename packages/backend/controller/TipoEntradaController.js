@@ -1,8 +1,3 @@
-/**
- * Capa: CONTROLLER.
- * Adapta HTTP <-> TipoEntradaService. Sin logica de negocio.
- * Errores -> next(err) para el middleware errorHandler.
- */
 export class TipoEntradaController {
     constructor(tipoEntradaService) {
         this.tipoEntradaService = tipoEntradaService;

@@ -1,8 +1,3 @@
-/**
- * Capa: CONTROLLER.
- * Adapta HTTP <-> ReseñaService. Sin logica de negocio.
- * Errores -> next(err) para el middleware errorHandler.
- */
 export class ReseñaController {
     constructor(resenaService) {
         this.resenaService = resenaService;

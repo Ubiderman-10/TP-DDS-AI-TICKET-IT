@@ -1,9 +1,3 @@
-/**
- * Capa: CONTROLLER.
- * Adapta HTTP <-> EventoService: extrae parametros, llama al service
- * y responde JSON plano. Sin logica de negocio.
- * Errores -> next(err) para el middleware errorHandler.
- */
 export class EventoController {
     constructor(eventoService) {
         this.eventoService = eventoService;
@@ -73,6 +67,16 @@ export class EventoController {
         try {
             const eventos = this.eventoService.getEventosOrganizador(Number(req.params.organizadorId));
             res.status(200).json({ data: eventos.map((e) => this._eventoDTO(e)) });
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    // GET /eventos/:eventoId  (detalle de un evento)
+    obtenerPorId(req, res, next) {
+        try {
+            const evento = this.eventoService.obtenerPorId(Number(req.params.eventoId));
+            res.status(200).json({ data: this._eventoDTO(evento) });
         } catch (err) {
             next(err);
         }
