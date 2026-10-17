@@ -1,0 +1,32 @@
+openapi: 3.0.0
+info:
+  title: API - Enums / Estados
+  version: 1.0.0
+  description: |
+    Enumeraciones usadas en la API para estados de compra y otros casos.
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desarrollo
+paths: {}
+components:
+  schemas:
+    EstadoCompra:
+      type: string
+      enum:
+        - PENDIENTE
+        - CONFIRMADA
+        - UTILIZADA
+        - CANCELADA
+        - REEMBOLSADA
+      description: Estado de una compra a lo largo del ciclo de vida de la misma.
+    ErrorCode:
+      type: string
+      example: VALIDATION_ERROR
+      description: Código de error utilizados en las respuestas de error.
+      enum:
+        - VALIDATION_ERROR
+        - NOT_FOUND
+        - AUTHENTICATION_REQUIRED
+        - FORBIDDEN
+        - CONFLICT
+        - INTERNAL_ERROR

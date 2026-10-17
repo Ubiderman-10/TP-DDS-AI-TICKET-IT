@@ -1,0 +1,122 @@
+openapi: 3.0.0
+info:
+  title: API - Usuarios
+  version: 1.0.0
+  description: |
+    Gestión de usuarios y sus favoritos. Un usuario puede ser comprador u organizador.
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desarrollo
+paths:
+  /usuarios:
+    post:
+      summary: Crear usuario
+      tags:
+        - Usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nombre
+                - apellido
+              properties:
+                nombre:
+                  type: string
+                  example: Ana
+                apellido:
+                  type: string
+                  example: Pérez
+      responses:
+        '201':
+          description: Usuario creado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  nombre:
+                    type: string
+                    example: Ana
+                  apellido:
+                    type: string
+                    example: Pérez
+                  favoritos:
+                    type: array
+                    items:
+                      type: integer
+        '400':
+          description: Datos inválidos.
+  /usuarios/{usuarioId}/favoritos:
+    post:
+      summary: Agregar un evento a favoritos
+      tags:
+        - Usuario
+      parameters:
+        - name: usuarioId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventoId:
+                  type: integer
+                  example: 2
+      responses:
+        '200':
+          description: Favorito agregado.
+        '404':
+          description: Usuario o evento no encontrado.
+  /usuarios/{usuarioId}/compras:
+    get:
+      summary: Listar las compras de un usuario
+      tags:
+        - Usuario
+      parameters:
+        - name: usuarioId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Compras del usuario
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Compra'
+        '404':
+          description: Usuario no encontrado
+components:
+  schemas:
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: Ana
+        apellido:
+          type: string
+          example: Pérez
+        favoritos:
+          type: array
+          items:
+            type: integer

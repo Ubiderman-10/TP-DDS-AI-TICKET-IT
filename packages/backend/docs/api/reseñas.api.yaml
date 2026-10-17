@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+  title: API - Reseñas
+  version: 1.0.0
+  description: |
+    Crear y visualizar reseñas de eventos por compradores.
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desarrollo
+paths:
+  /eventos/{eventoId}/resenas:
+    get:
+      summary: Listar reseñas de un evento
+      tags:
+        - Reseña
+      parameters:
+        - name: eventoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de reseñas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reseña'
+  /eventos/{eventoId}/resenas:
+    post:
+      summary: Crear reseña para un evento
+      tags:
+        - Reseña
+      parameters:
+        - name: eventoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                compradorId:
+                  type: integer
+                  example: 1
+                detalle:
+                  type: string
+                  example: Muy bueno, estuvo activo.
+                puntuacion:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  example: 5
+      responses:
+        '201':
+          description: Reseña creada.
+        '400':
+          description: Datos inválidos o regla de calificación no cumplida.
+components:
+  schemas:
+    Reseña:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        comprador:
+          $ref: '#/components/schemas/Usuario'
+        evento:
+          $ref: '#/components/schemas/Evento'
+        puntuacion:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        detalle:
+          type: string
+          example: Muy bueno, estuvo muy activo.

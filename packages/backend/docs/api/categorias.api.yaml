@@ -1,0 +1,52 @@
+openapi: 3.0.0
+info:
+  title: Categorías
+  version: 1.0.0
+  description: Gestión de categorías de eventos.
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desarrollo
+paths:
+  /categorias:
+    get:
+      summary: Listar categorías
+      tags:
+        - Categoria
+      responses:
+        '200':
+          description: Lista de categorías.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Categoria'
+    post:
+      summary: Crear categoría
+      tags:
+        - Categoria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Categoria'
+      responses:
+        '201':
+          description: Creado.
+        '400':
+          description: Datos inválidos.
+components:
+  schemas:
+    Categoria:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: Música
+        descripcion:
+          type: string
+          example: Eventos musicales

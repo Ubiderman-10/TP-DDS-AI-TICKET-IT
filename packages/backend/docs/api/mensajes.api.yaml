@@ -1,0 +1,110 @@
+openapi: 3.0.0
+info:
+  title: API - Mensajes
+  version: 1.0.0
+  description: |
+    Chat entre comprador y organizador dentro de una compra.
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desarrollo
+paths:
+  /compras/{compraId}/mensajes:
+    get:
+      summary: Listar mensajes de una compra
+      tags:
+        - Mensaje
+      parameters:
+        - name: compraId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de mensajes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Mensaje'
+  /compras/{compraId}/mensajes:
+    post:
+      summary: Enviar mensaje en una compra
+      tags:
+        - Mensaje
+      parameters:
+        - name: compraId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                texto:
+                  type: string
+                  example: Hola, ¿podemos confirmar la compra?
+      responses:
+        '201':
+          description: Mensaje enviado.
+        '404':
+          description: Compra no encontrada.
+  /compras/{compraId}/mensajes/{mensajeId}/responder:
+    post:
+      summary: Responder un mensaje
+      tags:
+        - Mensaje
+      parameters:
+        - name: compraId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: mensajeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                texto:
+                  type: string
+                  example: Sí, confirmo para el sábado.
+      responses:
+        '201':
+          description: Mensaje de respuesta enviado.
+        '400':
+          description: No se puede responder un mensaje ya cerrado.
+components:
+  schemas:
+    Mensaje:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        compra:
+          type: integer
+          example: 1
+        usuario:
+          $ref: '#/components/schemas/Usuario'
+        texto:
+          type: string
+          example: Hola, ¿podemos confirmar la compra?
+        enviado:
+          type: string
+          format: date-time
+          example: 2026-10-16T12:00:00.000Z
+        respondeA:
+          type: integer
+          description: ID del mensaje al que responde (opcional)

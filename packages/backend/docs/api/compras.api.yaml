@@ -1,0 +1,278 @@
+openapi: 3.0.0
+info:
+  title: API - Compras
+  version: 1.0.0
+  description: Compras en la plataforma. Incluye estado de compra, cupos disponibles, confirmación y reembolso.
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desarrollo
+paths:
+  /compras:
+    post:
+      summary: Crear compra
+      tags:
+        - Compra
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                compradorId:
+                  type: integer
+                  example: 1
+                eventoId:
+                  type: integer
+                  example: 2
+                tipoEntradaId:
+                  type: integer
+                  example: 1
+                cantidad:
+                  type: integer
+                  example: 2
+      responses:
+        '201':
+          description: Compra creada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Compra'
+        '400':
+          description: Error de validación o cupo insuficiente.
+        '404':
+          description: Recurso no encontrado.
+  /compras/{compraId}/confirmar:
+    put:
+      summary: Confirmar compra
+      tags:
+        - Compra
+      parameters:
+        - name: compraId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                usuarioId:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Estado actualizado.
+        '400':
+          description: No se puede confirmar.
+  /compras/{compraId}/utilizar:
+    put:
+      summary: Marcar compra como utilizada
+      tags:
+        - Compra
+      parameters:
+        - name: compraId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                usuarioId:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Estado actualizado.
+  /compras/{compraId}/cancelar:
+    put:
+      summary: Cancelar compra y preparar reembolso
+      tags:
+        - Compra
+      parameters:
+        - name: compraId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                usuarioId:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Compra cancelada.
+        '400':
+          description: La compra no puede cancelarse.
+  /compras/{compraId}/reembolsar:
+    put:
+      summary: Reembolsar compra
+      tags:
+        - Compra
+      parameters:
+        - name: compraId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                usuarioId:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Estado actualizado.
+        '400':
+          description: El reembolso no es válido.
+  /compras/{compraId}/historial:
+    get:
+      summary: Historial de cambios de estado de una compra
+      tags:
+        - Compra
+      parameters:
+        - name: compraId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Historial de cambios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CambioEstadoCompra'
+  /compras/usuario/{usuarioId}:
+    get:
+      summary: Ver compras de un usuario
+      tags:
+        - Compra
+      parameters:
+        - name: usuarioId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de compras del usuario
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Compra'
+  /compras/evento/{eventoId}:
+    get:
+      summary: Ver compras de un evento y disponibilidad de entradas
+      tags:
+        - Compra
+      parameters:
+        - name: eventoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Compras del evento y disponibilidad
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  compras:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Compra'
+                  disponibilidad:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DisponibilidadEntrada'
+components:
+  schemas:
+    Compra:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        comprador:
+          $ref: '#/components/schemas/Usuario'
+        evento:
+          $ref: '#/components/schemas/Evento'
+        tipoEntrada:
+          $ref: '#/components/schemas/TipoEntrada'
+        cantidad:
+          type: integer
+          example: 2
+        total:
+          type: number
+          example: 10000
+        estado:
+          type: string
+          enum:
+            - PENDIENTE
+            - CONFIRMADA
+            - UTILIZADA
+            - CANCELADA
+            - REEMBOLSADA
+        historial:
+          type: array
+          items:
+            $ref: '#/components/schemas/CambioEstadoCompra'
+    CambioEstadoCompra:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        compra:
+          type: integer
+          example: 1
+        estado:
+          type: string
+          enum:
+            - PENDIENTE
+            - CONFIRMADA
+            - UTILIZADA
+            - CANCELADA
+            - REEMBOLSADA
+        quien:
+          type: string
+          example: Sistema
+        fechaHora:
+          type: string
+          format: date-time
+          example: 2026-10-16T12:00:00.000Z
+    DisponibilidadEntrada:
+      type: object
+      properties:
+        tipoEntradaId:
+          type: integer
+          example: 1
+        disponibles:
+          type: integer
+          example: 45

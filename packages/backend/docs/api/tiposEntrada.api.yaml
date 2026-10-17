@@ -1,0 +1,85 @@
+openapi: 3.0.0
+info:
+  title: API - Tipos de Entrada
+  version: 1.0.0
+  description: |
+    Tipos de entradas de un evento (General, VIP, Platea, etc.).
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desarrollo
+paths:
+  /eventos/{eventoId}/tipos-entrada:
+    get:
+      summary: Listar tipos de entrada de un evento
+      tags:
+        - TipoEntrada
+      parameters:
+        - name: eventoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Tipos de entrada del evento
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TipoEntrada'
+  /eventos/{eventoId}/tipos-entrada:
+    post:
+      summary: Crear un tipo de entrada para un evento
+      tags:
+        - TipoEntrada
+      parameters:
+        - name: eventoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  example: VIP
+                descripcion:
+                  type: string
+                  example: Entrada a vip
+                precio:
+                  type: number
+                  example: 2500
+                cupo:
+                  type: integer
+                  example: 50
+      responses:
+        '201':
+          description: Tipo de entrada creado
+        '400':
+          description: Datos inválidos o evento no encontrado
+components:
+  schemas:
+    TipoEntrada:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: VIP
+        descripcion:
+          type: string
+          example: Entrada a vip
+        precio:
+          type: number
+          example: 2500
+        cupo:
+          type: integer
+          example: 50

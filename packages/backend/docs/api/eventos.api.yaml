@@ -1,0 +1,98 @@
+openapi: 3.0.0
+info:
+  title: API - Eventos
+  version: 1.0.0
+  description: |
+    Gestión de eventos para la plataforma AI Ticket It.
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desarrollo
+paths:
+  /eventos:
+    get:
+      summary: Listar eventos
+      tags:
+        - Evento
+      parameters:
+        - name: texto
+          in: query
+          description: Texto a buscar en nombre o descripción
+          required: false
+          schema:
+            type: string
+        - name: categoriaId
+          in: query
+          description: Filtrar por categoría
+          required: false
+          schema:
+            type: integer
+        - name: orden
+          in: query
+          description: Ordenar por precio, fecha o puntaje del organizador
+          required: false
+          schema:
+            type: string
+            enum:
+              - precio
+              - fecha
+              - puntajeOrganizador
+      responses:
+        '200':
+          description: Lista de eventos.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Evento'
+  /eventos/{eventoId}:
+    get:
+      summary: Obtener un evento
+      tags:
+        - Evento
+      parameters:
+        - name: eventoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Detalle del evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evento'
+        '404':
+          description: Evento no encontrado
+components:
+  schemas:
+    Evento:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: Confeti Fest
+        descripcion:
+          type: string
+          example: Festival de confeti
+        fecha:
+          type: string
+          format: date-time
+          example: 2026-10-20T20:00:00.000Z
+        multimedia:
+          type: array
+          items:
+            type: string
+          example: ["https://ejemplo.com/confeti.jpg"]
+        categoria:
+          $ref: '#/components/schemas/Categoria'
+        organizador:
+          $ref: '#/components/schemas/Usuario'
+        tiposEntrada:
+          type: array
+          items:
+            $ref: '#/components/schemas/TipoEntrada'
