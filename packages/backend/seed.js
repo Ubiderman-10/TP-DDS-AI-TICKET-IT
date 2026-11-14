@@ -6,11 +6,11 @@ export function seed({ categoriaService, usuarioService, eventoService }) {
   const humor = categoriaService.crear({ nombre: 'Humor', descripcion: 'Stand up y comedia' });
   categoriaService.crear({ nombre: 'Deportes', descripcion: 'Eventos deportivos' });
 
-  // Un mismo Usuario puede organizar eventos y comprar los de otros (según el diagrama de clases).
-  const ana = usuarioService.crearUsuario({ nombre: 'Ana', apellido: 'Organizadora' });
-  const martin = usuarioService.crearUsuario({ nombre: 'Martín', apellido: 'Productor' });
-  usuarioService.crearUsuario({ nombre: 'Carlos', apellido: 'Comprador' });
-  usuarioService.crearUsuario({ nombre: 'Lucía', apellido: 'Compradora' });
+  // Ana y Martín son organizadores; Carlos y Lucía son compradores (funcionalidades separadas).
+  const ana = usuarioService.crearUsuario({ nombre: 'Ana', apellido: 'Organizadora', rol: 'ORGANIZADOR' });
+  const martin = usuarioService.crearUsuario({ nombre: 'Martín', apellido: 'Productor', rol: 'ORGANIZADOR' });
+  usuarioService.crearUsuario({ nombre: 'Carlos', apellido: 'Comprador', rol: 'COMPRADOR' });
+  usuarioService.crearUsuario({ nombre: 'Lucía', apellido: 'Compradora', rol: 'COMPRADOR' });
 
   const enDias = (d) => new Date(Date.now() + d * 24 * 60 * 60 * 1000);
 

@@ -1,6 +1,8 @@
 import { Evento } from '../domain/Evento.js';
 import { TipoEntrada } from '../domain/TipoEntrada.js';
 import { NotFoundError } from '../errors/NotFoundError.js';
+import { AuthorizationError } from '../errors/AuthorizationError.js';
+import { puedeOrganizar } from '../domain/RolUsuario.js';
 
 export class EventoService {
     constructor(eventoRepository, categoriaRepository, usuarioRepository, resenaRepository, tipoEntradaRepository = null) {
@@ -16,6 +18,9 @@ export class EventoService {
         const organizador = this.usuarioRepository.getById(organizadorId);
         if (!organizador) {
             throw new NotFoundError('Organizador no encontrado');
+        }
+        if (!puedeOrganizar(organizador)) {
+            throw new AuthorizationError('Solo un organizador puede crear eventos');
         }
         const categoria = this.categoriaRepository.getById(categoriaId);
         if (!categoria) {
@@ -61,20 +66,25 @@ export class EventoService {
     }
 
     // Ordenar por precio (min), fecha o puntaje del organizador.
-    ordenarPor(eventos, criterio) {
+    // direccion: 'asc' | 'desc'. Si no se indica, precio y fecha van ascendente y el puntaje descendente.
+    ordenarPor(eventos, criterio, direccion) {
         const precioMinimo = (e) => (e.tiposEntrada.length ? Math.min(...e.tiposEntrada.map((t) => t.precio)) : Infinity);
-        if (criterio === 'precio') {
-            return [...eventos].sort((a, b) => precioMinimo(a) - precioMinimo(b));
+        const criterios = {
+            precio: { clave: precioMinimo, defecto: 'asc' },
+            fecha: { clave: (e) => new Date(e.fecha).getTime(), defecto: 'asc' },
+            puntajeOrganizador: { clave: (e) => this.puntajeOrganizador(e.organizador.id), defecto: 'desc' }
+        };
+        const config = criterios[criterio];
+        if (!config) {
+            return eventos;
         }
-        if (criterio === 'fecha') {
-            return [...eventos].sort((a, b) => a.fecha - b.fecha);
-        }
-        if (criterio === 'puntajeOrganizador') {
-            return [...eventos].sort(
-                (a, b) => this.puntajeOrganizador(b.organizador.id) - this.puntajeOrganizador(a.organizador.id)
-            );
-        }
-        return eventos;
+        const sentido = direccion === 'asc' || direccion === 'desc' ? direccion : config.defecto;
+        const signo = sentido === 'asc' ? 1 : -1;
+        return [...eventos].sort((a, b) => {
+            const x = config.clave(a);
+            const y = config.clave(b);
+            return x === y ? 0 : signo * (x < y ? -1 : 1);
+        });
     }
 
     // Eventos de un organizador.

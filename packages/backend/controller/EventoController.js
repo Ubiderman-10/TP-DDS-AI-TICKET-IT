@@ -46,7 +46,7 @@ export class EventoController {
         }
     }
 
-    // GET /eventos?texto=&categoriaId=&orden=precio|fecha|puntajeOrganizador
+    // GET /eventos?texto=&categoriaId=&orden=precio|fecha|puntajeOrganizador&direccion=asc|desc
     listar(req, res, next) {
         try {
             const eventos = this.eventoService.buscar({
@@ -54,7 +54,7 @@ export class EventoController {
                 categoriaId: req.query.categoriaId !== undefined ? Number(req.query.categoriaId) : undefined
             });
             const resultado = req.query.orden
-                ? this.eventoService.ordenarPor(eventos, req.query.orden)
+                ? this.eventoService.ordenarPor(eventos, req.query.orden, req.query.direccion)
                 : eventos;
             res.status(200).json({ data: resultado.map((e) => this._eventoDTO(e)) });
         } catch (err) {

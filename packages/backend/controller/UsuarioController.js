@@ -8,6 +8,7 @@ export class UsuarioController {
             id: u.id,
             nombre: u.nombre,
             apellido: u.apellido,
+            rol: u.rol,
             favoritos: u.favoritos.map((e) => e.id)
         };
     }
@@ -32,12 +33,13 @@ export class UsuarioController {
         }
     }
 
-    // POST /usuarios  body: { nombre, apellido }
+    // POST /usuarios  body: { nombre, apellido, rol? }
     crearUsuario(req, res, next) {
         try {
             const usuario = this.usuarioService.crearUsuario({
                 nombre: req.body.nombre,
-                apellido: req.body.apellido
+                apellido: req.body.apellido,
+                rol: req.body.rol
             });
             res.status(201).json({ data: this._usuarioDTO(usuario) });
         } catch (err) {

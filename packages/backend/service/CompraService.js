@@ -5,6 +5,7 @@ import { NotFoundError } from '../errors/NotFoundError.js';
 import { ValidationError } from '../errors/ValidationError.js';
 import { BusinessRuleError } from '../errors/BusinessRuleError.js';
 import { AuthorizationError } from '../errors/AuthorizationError.js';
+import { puedeComprar } from '../domain/RolUsuario.js';
 
 export class CompraService {
     constructor(compraRepository, eventoRepository, tipoEntradaRepository, usuarioRepository, cambioEstadoRepository) {
@@ -60,6 +61,9 @@ export class CompraService {
         const comprador = this.usuarioRepository.getById(compradorId);
         if (!comprador) {
             throw new NotFoundError('Comprador no encontrado');
+        }
+        if (!puedeComprar(comprador)) {
+            throw new AuthorizationError('Un organizador no puede comprar entradas');
         }
         const evento = this.eventoRepository.getById(eventoId);
         if (!evento) {
