@@ -9,3 +9,6 @@ export const setUsuario = (usuario) => {
 export const actualizarUsuario = (parcial) => {
   usuarioActual = { ...usuarioActual, ...parcial };
 };
+// Reglas de rol (el backend las valida también): ORGANIZADOR publica eventos, COMPRADOR compra, AMBOS hace las dos cosas.
+export const puedeComprar = (usuario) => !!usuario && (usuario.rol === 'COMPRADOR' || usuario.rol === 'AMBOS');
+export const puedeOrganizar = (usuario) => !!usuario && (usuario.rol === 'ORGANIZADOR' || usuario.rol === 'AMBOS');

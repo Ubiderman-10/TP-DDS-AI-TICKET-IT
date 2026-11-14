@@ -1,9 +1,10 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { comprasService } from '../services/events';
 import CompraItem from '../components/CompraItem';
-import { ESTADO, ui } from '../theme';
+import Vacio from '../components/Vacio';
+import { ESTADO, ui, colores } from '../theme';
 import { getUsuario } from '../session';
 
 export default function MisComprasScreen({ navigation }) {
@@ -61,7 +62,7 @@ export default function MisComprasScreen({ navigation }) {
   if (cargando) {
     return (
       <View style={ui.centro}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={colores.primario} />
       </View>
     );
   }
@@ -72,7 +73,7 @@ export default function MisComprasScreen({ navigation }) {
       data={compras}
       keyExtractor={(c) => c.id.toString()}
       contentContainerStyle={ui.lista}
-      ListEmptyComponent={<Text style={[ui.texto, { textAlign: 'center', marginTop: 32 }]}>No tenés compras registradas</Text>}
+      ListEmptyComponent={<Vacio icono="ticket-outline" mensaje="Todavía no tenés compras. ¡Explorá los eventos!" />}
       renderItem={({ item }) => (
         <CompraItem
           compra={item}

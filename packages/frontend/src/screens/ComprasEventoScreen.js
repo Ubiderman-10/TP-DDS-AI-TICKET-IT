@@ -1,9 +1,22 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { comprasService } from '../services/events';
 import { getUsuario } from '../session';
-import { ESTADO, colorEstado, ui } from '../theme';
+import EstadoBadge from '../components/EstadoBadge';
+import Avatar from '../components/Avatar';
+import Vacio from '../components/Vacio';
+import { ESTADO, ui, colores, formatearPrecio } from '../theme';
+
+function Boton({ icono, texto, onPress, estilo }) {
+  return (
+    <TouchableOpacity style={[ui.botonChico, estilo]} onPress={onPress}>
+      <Ionicons name={icono} size={16} color="#fff" />
+      <Text style={[ui.botonTexto, { marginLeft: 6 }]}>{texto}</Text>
+    </TouchableOpacity>
+  );
+}
 
 // Vista del organizador: compras de un evento + entradas disponibles por tipo.
 export default function ComprasEventoScreen({ route, navigation }) {
@@ -37,43 +50,45 @@ export default function ComprasEventoScreen({ route, navigation }) {
   if (!datos) {
     return (
       <View style={ui.centro}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={colores.primario} />
       </View>
     );
   }
 
   return (
     <ScrollView style={ui.pantalla} contentContainerStyle={ui.lista}>
-      <Text style={ui.subtitulo}>Entradas disponibles</Text>
+      <Text style={[ui.subtitulo, { marginTop: 0 }]}>Entradas disponibles</Text>
       <View style={ui.card}>
-        {datos.disponibilidad.map((d) => (
-          <Text key={d.tipoEntradaId} style={ui.texto}>{`${d.nombre}: ${d.disponibles} disponibles`}</Text>
+        {datos.disponibilidad.map((d, i) => (
+          <View key={d.tipoEntradaId} style={[ui.fila, { justifyContent: 'space-between', flexWrap: 'nowrap', paddingVertical: 6, borderTopWidth: i ? 1 : 0, borderTopColor: colores.borde }]}>
+            <Text style={{ fontWeight: '700', color: colores.texto }}>{d.nombre}</Text>
+            <Text style={{ fontWeight: '800', color: d.disponibles === 0 ? colores.peligro : colores.ok }}>
+              {d.disponibles === 0 ? 'Agotado' : `${d.disponibles} disponibles`}
+            </Text>
+          </View>
         ))}
       </View>
 
       <Text style={ui.subtitulo}>Compras</Text>
-      {datos.compras.length === 0 && <Text style={ui.texto}>Todavía no hay compras.</Text>}
+      {datos.compras.length === 0 && <Vacio icono="receipt-outline" mensaje="Todavía no hay compras para este evento." />}
       {datos.compras.map((c) => (
         <View key={c.id} style={ui.card}>
-          <View style={[ui.fila, { justifyContent: 'space-between' }]}>
-            <Text style={{ fontWeight: '600' }}>{`${c.comprador.nombre} ${c.comprador.apellido}`}</Text>
-            <Text style={{ fontWeight: '700', color: colorEstado[c.estado] }}>{c.estado}</Text>
+          <View style={[ui.fila, { justifyContent: 'space-between', flexWrap: 'nowrap' }]}>
+            <View style={[ui.fila, { flexWrap: 'nowrap', flex: 1 }]}>
+              <Avatar nombre={c.comprador.nombre} apellido={c.comprador.apellido} id={c.comprador.id} size={38} />
+              <Text style={{ fontWeight: '700', color: colores.texto, marginLeft: 10, flex: 1 }} numberOfLines={1}>{`${c.comprador.nombre} ${c.comprador.apellido}`}</Text>
+            </View>
+            <EstadoBadge estado={c.estado} />
           </View>
-          <Text style={ui.texto}>{`${c.tipoEntrada.nombre} x ${c.cantidad} - $${c.total}`}</Text>
+          <Text style={[ui.texto, { marginTop: 10 }]}>{`${c.cantidad} x ${c.tipoEntrada.nombre} · ${formatearPrecio(c.total)}`}</Text>
           <View style={ui.fila}>
             {c.estado === ESTADO.PENDIENTE && (
-              <TouchableOpacity style={[ui.botonChico, ui.botonOk]} onPress={() => ejecutar(() => comprasService.confirmar(c.id, usuario.id))}>
-                <Text style={ui.botonTexto}>Confirmar pago</Text>
-              </TouchableOpacity>
+              <Boton icono="card-outline" texto="Confirmar pago" estilo={ui.botonOk} onPress={() => ejecutar(() => comprasService.confirmar(c.id, usuario.id))} />
             )}
             {c.estado === ESTADO.CONFIRMADA && (
-              <TouchableOpacity style={[ui.botonChico, ui.botonOk]} onPress={() => ejecutar(() => comprasService.utilizar(c.id, usuario.id))}>
-                <Text style={ui.botonTexto}>Marcar utilizada</Text>
-              </TouchableOpacity>
+              <Boton icono="checkmark-done" texto="Marcar utilizada" estilo={ui.botonOk} onPress={() => ejecutar(() => comprasService.utilizar(c.id, usuario.id))} />
             )}
-            <TouchableOpacity style={ui.botonChico} onPress={() => navigation.navigate('ChatCompra', { compraId: c.id })}>
-              <Text style={ui.botonTexto}>Chat</Text>
-            </TouchableOpacity>
+            <Boton icono="chatbubbles-outline" texto="Chat" estilo={{ backgroundColor: '#475569' }} onPress={() => navigation.navigate('ChatCompra', { compraId: c.id })} />
           </View>
         </View>
       ))}
