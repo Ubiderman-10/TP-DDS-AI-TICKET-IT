@@ -37,3 +37,13 @@ test('CategoriaService: lanzar ValidationError si falta nombre o descripcion', a
     }
     assert.ok(error, 'Debería lanzar error si falta descripcion');
 });
+
+test('CategoriaService: no permite crear una categoria con un nombre ya existente', async () => {
+    const repo = new CategoriaRepository();
+    const service = new CategoriaService(repo);
+
+    service.crear({ nombre: 'Arte', descripcion: 'Muestras' });
+
+    assert.throws(() => service.crear({ nombre: '  arte ', descripcion: 'Otra' }), /Ya existe/);
+    assert.strictEqual(service.listar().length, 1);
+});
