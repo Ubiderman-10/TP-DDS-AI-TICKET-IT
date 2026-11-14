@@ -12,7 +12,9 @@ export class Usuario {
     }
 
     agregarFavorito(evento){
-        this.favoritos.push(evento);
+        if (!this.favoritos.includes(evento)) {
+            this.favoritos.push(evento);
+        }
     }
 
     removerFavorito(evento){

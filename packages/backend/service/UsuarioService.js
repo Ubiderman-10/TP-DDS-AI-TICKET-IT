@@ -7,6 +7,18 @@ export class UsuarioService {
         this.eventoRepository = eventoRepository;
     }
 
+    listar() {
+        return this.usuarioRepository.getAll();
+    }
+
+    obtener(usuarioId) {
+        const usuario = this.usuarioRepository.getById(usuarioId);
+        if (!usuario) {
+            throw new NotFoundError('Usuario no encontrado');
+        }
+        return usuario;
+    }
+
     crearUsuario({ nombre, apellido }) {
         const usuario = new Usuario({ nombre: nombre, apellido: apellido });
         this.usuarioRepository.save(usuario);

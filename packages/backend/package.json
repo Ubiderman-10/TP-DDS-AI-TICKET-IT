@@ -2,9 +2,9 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "Backend de AI Ticket It - Node + Express",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "test": "jest --testMatch \"**/*.test.js\"",
+    "test": "node --test",
     "dev": "nodemon index.js",
     "start": "node index.js"
   },

@@ -72,6 +72,9 @@ export class CompraService {
         if (cantidad <= 0) {
             throw new ValidationError('La cantidad debe ser mayor a 0');
         }
+        if (evento.organizador.id === compradorId) {
+            throw new BusinessRuleError('No podes comprar entradas de tu propio evento');
+        }
         const disponibles = this.disponibilidad(tipoEntradaId);
         if (disponibles < cantidad) {
             throw new BusinessRuleError(`No hay cupo suficiente. Disponibles: ${disponibles}`);
@@ -98,6 +101,16 @@ export class CompraService {
         if (!usuario) {
             throw new NotFoundError('Usuario no encontrado');
         }
+        const compra = this.compraRepository.getById(compraId);
+        if (!compra) {
+            throw new NotFoundError('Compra no encontrada');
+        }
+        if (usuario.id !== compra.comprador.id && usuario.id !== compra.evento.organizador.id) {
+            throw new AuthorizationError('Solo el comprador o el organizador pueden confirmar la compra');
+        }
+        if (compra.estado !== EstadoCompra.PENDIENTE) {
+            throw new BusinessRuleError('Solo se puede confirmar una compra pendiente');
+        }
         return this.cambiarEstado(compraId, EstadoCompra.CONFIRMADA, usuario);
     }
 
@@ -106,6 +119,16 @@ export class CompraService {
         const usuario = this.usuarioRepository.getById(usuarioId);
         if (!usuario) {
             throw new NotFoundError('Usuario no encontrado');
+        }
+        const compra = this.compraRepository.getById(compraId);
+        if (!compra) {
+            throw new NotFoundError('Compra no encontrada');
+        }
+        if (usuario.id !== compra.evento.organizador.id) {
+            throw new AuthorizationError('Solo el organizador del evento puede marcar la entrada como utilizada');
+        }
+        if (compra.estado !== EstadoCompra.CONFIRMADA) {
+            throw new BusinessRuleError('Solo se puede utilizar una compra confirmada');
         }
         return this.cambiarEstado(compraId, EstadoCompra.UTILIZADA, usuario);
     }
@@ -141,6 +164,9 @@ export class CompraService {
         const usuario = this.usuarioRepository.getById(usuarioId);
         if (!usuario) {
             throw new NotFoundError('Usuario no encontrado');
+        }
+        if (usuario.id !== compra.comprador.id && usuario.id !== compra.evento.organizador.id) {
+            throw new AuthorizationError('Solo el comprador o el organizador pueden reembolsar la compra');
         }
         return this.cambiarEstado(compraId, EstadoCompra.REEMBOLSADA, usuario);
     }

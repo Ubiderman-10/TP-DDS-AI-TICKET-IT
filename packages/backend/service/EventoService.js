@@ -3,11 +3,12 @@ import { TipoEntrada } from '../domain/TipoEntrada.js';
 import { NotFoundError } from '../errors/NotFoundError.js';
 
 export class EventoService {
-    constructor(eventoRepository, categoriaRepository, usuarioRepository, resenaRepository) {
+    constructor(eventoRepository, categoriaRepository, usuarioRepository, resenaRepository, tipoEntradaRepository = null) {
         this.eventoRepository = eventoRepository;
         this.categoriaRepository = categoriaRepository;
         this.usuarioRepository = usuarioRepository;
         this.resenaRepository = resenaRepository;
+        this.tipoEntradaRepository = tipoEntradaRepository;
     }
 
     // Crear un evento (requiere organizador y categoria existentes).
@@ -22,6 +23,11 @@ export class EventoService {
         }
         const tipos = (tiposEntrada || []).map((t) => new TipoEntrada(t));
         const evento = new Evento({ ...datos, categoria: categoria, organizador: organizador, tiposEntrada: tipos });
+        // Los tipos necesitan id propio para poder comprarse (CompraService los busca por id).
+        // Se guardan despues de validar el Evento para no dejar tipos huerfanos si falla.
+        if (this.tipoEntradaRepository) {
+            tipos.forEach((t) => this.tipoEntradaRepository.save(t));
+        }
         this.eventoRepository.save(evento);
         return evento;
     }

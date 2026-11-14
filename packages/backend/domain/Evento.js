@@ -13,7 +13,7 @@ export class Evento {
             throw new ValidationError('La categoría debe ser una instancia de la clase Categoria');
         }
 
-        if(!fecha) {
+        if(!fecha || Number.isNaN(new Date(fecha).getTime())) {
             throw new ValidationError('El Evento debe tener una fecha');
         }
 

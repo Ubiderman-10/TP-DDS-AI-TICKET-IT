@@ -7,6 +7,8 @@ import { Router } from 'express';
 export function createUsuarioRouter(usuarioController, compraController) {
     const router = Router();
 
+    router.get('/:usuarioId', (req, res, next) => usuarioController.obtener(req, res, next));
+    router.get('/', (req, res, next) => usuarioController.listar(req, res, next));
     router.post('/', (req, res, next) => usuarioController.crearUsuario(req, res, next));
     router.post('/:usuarioId/favoritos', (req, res, next) => usuarioController.agregarFavoritos(req, res, next));
     router.delete('/:usuarioId/favoritos/:eventoId', (req, res, next) => usuarioController.removerFavoritos(req, res, next));

@@ -41,7 +41,8 @@ export class Compra {
     }
 
     puedeSerCancelada(fechaActual = new Date()) {
-        return this.estado !== EstadoCompra.UTILIZADA && !this.evento.yaOcurrio(fechaActual);
+        const estadoCancelable = this.estado === EstadoCompra.PENDIENTE || this.estado === EstadoCompra.CONFIRMADA;
+        return estadoCancelable && !this.evento.yaOcurrio(fechaActual);
     }
 
     agregarMensaje(mensaje) {

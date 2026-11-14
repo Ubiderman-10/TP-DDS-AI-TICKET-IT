@@ -1,11 +1,19 @@
 import { Mensaje } from '../domain/Mensaje.js';
 import { NotFoundError } from '../errors/NotFoundError.js';
+import { AuthorizationError } from '../errors/AuthorizationError.js';
 
 export class MensajeService {
     constructor(mensajeRepository, compraRepository, usuarioRepository) {
         this.mensajeRepository = mensajeRepository;
         this.compraRepository = compraRepository;
         this.usuarioRepository = usuarioRepository;
+    }
+
+    // Solo participan del chat el comprador y el organizador del evento.
+    validarParticipante(compra, usuario) {
+        if (usuario.id !== compra.comprador.id && usuario.id !== compra.evento.organizador.id) {
+            throw new AuthorizationError('Solo el comprador y el organizador pueden participar del chat');
+        }
     }
 
     // Enviar un mensaje en el chat de una compra.
@@ -15,6 +23,7 @@ export class MensajeService {
             throw new NotFoundError('Compra no encontrada');
         }
         const emisor = this.usuarioRepository.getById(emisorId);
+        this.validarParticipante(compra, emisor);
         if (!emisor) {
             throw new NotFoundError('Emisor no encontrado');
         }
@@ -31,6 +40,7 @@ export class MensajeService {
             throw new NotFoundError('Compra no encontrada');
         }
         const emisor = this.usuarioRepository.getById(emisorId);
+        this.validarParticipante(compra, emisor);
         if (!emisor) {
             throw new NotFoundError('Emisor no encontrado');
         }

@@ -12,6 +12,26 @@ export class UsuarioController {
         };
     }
 
+    // GET /usuarios
+    listar(req, res, next) {
+        try {
+            const usuarios = this.usuarioService.listar();
+            res.status(200).json({ data: usuarios.map((u) => this._usuarioDTO(u)) });
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    // GET /usuarios/:usuarioId
+    obtener(req, res, next) {
+        try {
+            const usuario = this.usuarioService.obtener(Number(req.params.usuarioId));
+            res.status(200).json({ data: this._usuarioDTO(usuario) });
+        } catch (err) {
+            next(err);
+        }
+    }
+
     // POST /usuarios  body: { nombre, apellido }
     crearUsuario(req, res, next) {
         try {
