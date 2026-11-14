@@ -5,6 +5,11 @@ export function seed({ categoriaService, usuarioService, eventoService }) {
   const teatro = categoriaService.crear({ nombre: 'Teatro', descripcion: 'Obras y espectáculos' });
   const humor = categoriaService.crear({ nombre: 'Humor', descripcion: 'Stand up y comedia' });
   categoriaService.crear({ nombre: 'Deportes', descripcion: 'Eventos deportivos' });
+  categoriaService.crear({ nombre: 'Conferencias', descripcion: 'Charlas y congresos' });
+  categoriaService.crear({ nombre: 'Gastronomía', descripcion: 'Ferias y experiencias gastronómicas' });
+  categoriaService.crear({ nombre: 'Cine', descripcion: 'Estrenos y ciclos de cine' });
+  categoriaService.crear({ nombre: 'Danza', descripcion: 'Espectáculos de danza' });
+  categoriaService.crear({ nombre: 'Infantil', descripcion: 'Espectáculos para chicos' });
 
   // Ana y Martín son organizadores; Carlos y Lucía son compradores (funcionalidades separadas).
   const ana = usuarioService.crearUsuario({ nombre: 'Ana', apellido: 'Organizadora', rol: 'ORGANIZADOR' });
