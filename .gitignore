@@ -1,6 +1,7 @@
 # Dependencias
 packages/backend/node_modules
 packages/frontend/node_modules
+node_modules/
 
 # Variables de entorno y secretos
 .env
