@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Alert } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Modal, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { categoriasService, eventosService } from '../services/events';
+import CampoFechaHora from '../components/CampoFechaHora';
 import { getUsuario } from '../session';
-import { ui } from '../theme';
+import { ui, colores } from '../theme';
 
 const tipoVacio = () => ({ nombre: '', descripcion: '', precio: '', cupo: '' });
+
+// Por defecto: mañana a las 20:00
+const fechaPorDefecto = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(20, 0, 0, 0);
+  return d;
+};
 
 export default function CrearEventoScreen({ navigation }) {
   const usuario = getUsuario();
@@ -13,7 +23,10 @@ export default function CrearEventoScreen({ navigation }) {
   const [categorias, setCategorias] = useState([]);
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [fecha, setFecha] = useState(''); // formato: 2026-12-31 20:00
+  const [fecha, setFecha] = useState(fechaPorDefecto());
+  const [modalCategoria, setModalCategoria] = useState(false);
+  const [nuevaCategoria, setNuevaCategoria] = useState('');
+  const [descripcionCategoria, setDescripcionCategoria] = useState('');
   const [imagen, setImagen] = useState('');
   const [categoriaId, setCategoriaId] = useState(null);
   const [tipos, setTipos] = useState([tipoVacio()]);
@@ -23,13 +36,28 @@ export default function CrearEventoScreen({ navigation }) {
     categoriasService.listar().then(setCategorias).catch((e) => Alert.alert('Error', e.message));
   }, []);
 
+  // Las categorías no son una lista cerrada: el organizador puede crear las que necesite.
+  const crearCategoria = async () => {
+    if (!nuevaCategoria.trim()) return Alert.alert('Atención', 'Escribí el nombre de la categoría');
+    try {
+      const nombreCategoria = nuevaCategoria.trim();
+      const creada = await categoriasService.crear(nombreCategoria, descripcionCategoria.trim() || `Eventos de ${nombreCategoria}`);
+      setCategorias((actuales) => [...actuales, creada]);
+      setCategoriaId(creada.id);
+      setNuevaCategoria('');
+      setDescripcionCategoria('');
+      setModalCategoria(false);
+    } catch (error) {
+      Alert.alert('No se pudo crear la categoría', error.message);
+    }
+  };  
+
   const cambiarTipo = (indice, campo, valor) =>
     setTipos((actuales) => actuales.map((t, i) => (i === indice ? { ...t, [campo]: valor } : t)));
 
   const crear = async () => {
-    const fechaEvento = new Date(fecha.trim().replace(' ', 'T'));
+    const fechaEvento = fecha;
     if (!nombre.trim() || !descripcion.trim()) return Alert.alert('Atención', 'Completá nombre y descripción');
-    if (Number.isNaN(fechaEvento.getTime())) return Alert.alert('Atención', 'La fecha debe tener el formato AAAA-MM-DD HH:mm');
     if (fechaEvento < new Date()) return Alert.alert('Atención', 'La fecha tiene que ser futura');
     if (!categoriaId) return Alert.alert('Atención', 'Elegí una categoría');
     if (tipos.some((t) => !t.nombre.trim() || !t.descripcion.trim() || !(Number(t.precio) > 0) || !(Number(t.cupo) > 0))) {
@@ -68,8 +96,8 @@ export default function CrearEventoScreen({ navigation }) {
         <TextInput style={ui.input} value={nombre} onChangeText={setNombre} placeholder="Confeti Fest" />
         <Text style={[ui.texto, { marginTop: 10 }]}>Descripción</Text>
         <TextInput style={ui.input} value={descripcion} onChangeText={setDescripcion} placeholder="De qué se trata" multiline />
-        <Text style={[ui.texto, { marginTop: 10 }]}>Fecha y hora (AAAA-MM-DD HH:mm)</Text>
-        <TextInput style={ui.input} value={fecha} onChangeText={setFecha} placeholder="2026-12-31 20:00" autoCapitalize="none" />
+        <Text style={[ui.texto, { marginTop: 10, marginBottom: 6 }]}>Fecha y hora</Text>
+        <CampoFechaHora valor={fecha} onChange={setFecha} />
         <Text style={[ui.texto, { marginTop: 10 }]}>URL de imagen (opcional)</Text>
         <TextInput style={ui.input} value={imagen} onChangeText={setImagen} placeholder="https://..." autoCapitalize="none" />
       </View>
@@ -81,7 +109,29 @@ export default function CrearEventoScreen({ navigation }) {
             <Text style={[ui.chipTexto, categoriaId === c.id && ui.chipTextoActivo]}>{c.nombre}</Text>
           </TouchableOpacity>
         ))}
+        <TouchableOpacity style={[ui.chip, { marginBottom: 8, borderStyle: 'dashed', borderColor: colores.primario }]} onPress={() => setModalCategoria(true)}>
+          <Ionicons name="add" size={16} color={colores.primario} />
+          <Text style={[ui.chipTexto, { color: colores.primario, marginLeft: 4 }]}>Nueva categoría</Text>
+        </TouchableOpacity>        
       </View>
+
+      <Modal visible={modalCategoria} transparent animationType="fade" onRequestClose={() => setModalCategoria(false)}>
+        <KeyboardAvoidingView style={{ flex: 1, backgroundColor: '#00000066', justifyContent: 'center', padding: 24 }} behavior="padding">
+          <View style={{ backgroundColor: '#fff', borderRadius: 18, padding: 20 }}>
+            <Text style={ui.titulo}>Nueva categoría</Text>
+            <TextInput style={[ui.input, { marginTop: 14 }]} value={nuevaCategoria} onChangeText={setNuevaCategoria} placeholder="Nombre (por ejemplo, Cine)" autoFocus />
+            <TextInput style={[ui.input, { marginTop: 10 }]} value={descripcionCategoria} onChangeText={setDescripcionCategoria} placeholder="Descripción (opcional)" />
+            <View style={[ui.fila, { marginTop: 16, justifyContent: 'flex-end' }]}>
+              <TouchableOpacity style={[ui.botonChico, { backgroundColor: '#9ca3af' }]} onPress={() => setModalCategoria(false)}>
+                <Text style={ui.botonTexto}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[ui.botonChico, { marginRight: 0 }]} onPress={crearCategoria}>
+                <Text style={ui.botonTexto}>Crear</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       <Text style={ui.subtitulo}>Tipos de entrada</Text>
       {tipos.map((t, i) => (

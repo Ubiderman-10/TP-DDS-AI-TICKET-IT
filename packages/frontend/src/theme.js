@@ -45,15 +45,24 @@ const VISUAL_CATEGORIAS = {
   teatro: { emoji: '🎭', color: '#db2777' },
   humor: { emoji: '😂', color: '#f59e0b' },
   deportes: { emoji: '⚽', color: '#059669' },
+  conferencias: { emoji: '🎤', color: '#0891b2' },
+  gastronomia: { emoji: '🍽️', color: '#ea580c' },
+  cine: { emoji: '🎬', color: '#475569' },
+  danza: { emoji: '💃', color: '#e11d48' },
+  infantil: { emoji: '🧸', color: '#16a34a' },
 };
-const VISUAL_DEFECTO = { emoji: '🎟️', color: '#4f46e5' };
+// Las categorías nuevas (creadas desde la app) reciben un color según su nombre.
+const PALETA_CATEGORIAS = ['#4f46e5', '#0d9488', '#c026d3', '#ca8a04', '#2563eb', '#dc2626', '#65a30d'];
 
 export function visualCategoria(nombre) {
   const clave = (nombre || '')
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
-  return VISUAL_CATEGORIAS[clave] || VISUAL_DEFECTO;
+  if (VISUAL_CATEGORIAS[clave]) return VISUAL_CATEGORIAS[clave];
+  let hash = 0;
+  for (const letra of clave) hash = (hash * 31 + letra.charCodeAt(0)) % 997;
+  return { emoji: '🎟️', color: PALETA_CATEGORIAS[hash % PALETA_CATEGORIAS.length] };
 }
 
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];

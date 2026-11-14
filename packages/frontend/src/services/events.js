@@ -12,6 +12,7 @@ export const usuariosService = {
 
 export const categoriasService = {
   listar: () => data(api.get('/categorias')),
+  crear: (nombre, descripcion) => data(api.post('/categorias', { nombre, descripcion })),
 };
 
 export const eventosService = {

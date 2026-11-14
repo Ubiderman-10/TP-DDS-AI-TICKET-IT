@@ -16,8 +16,8 @@ const OPCIONES_ORDEN = [
   { valor: null, etiqueta: 'Sin ordenar' },
   { valor: 'precio|desc', etiqueta: 'Mayor precio' },
   { valor: 'precio|asc', etiqueta: 'Menor precio' },
-  { valor: 'fecha|asc', etiqueta: 'Más antiguo' },
-  { valor: 'fecha|desc', etiqueta: 'Más reciente' },
+  { valor: 'fecha|asc', etiqueta: 'Fecha más próxima' },
+  { valor: 'fecha|desc', etiqueta: 'Fecha más lejana' },
   { valor: 'puntajeOrganizador|desc', etiqueta: 'Mayor puntaje' },
   { valor: 'puntajeOrganizador|asc', etiqueta: 'Menor puntaje' },
 ];
