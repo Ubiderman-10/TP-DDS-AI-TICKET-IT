@@ -87,6 +87,8 @@ export default function DetalleEventoScreen({ route, navigation }) {
   };
 
   const seleccionar = (tipo) => {
+    // Volver a tocar el tipo ya elegido (por ejemplo un + deshabilitado en el máximo) no reinicia la cantidad.
+    if (tipoSeleccionado?.id === tipo.id) return;
     setTipoSeleccionado(tipo);
     setCantidad(1);
   };
@@ -201,7 +203,8 @@ export default function DetalleEventoScreen({ route, navigation }) {
           </TouchableOpacity>
         )}
 
-        <Text style={ui.subtitulo}>Reseñas del organizador</Text>
+        <Text style={ui.subtitulo}>Reseñas de eventos anteriores</Text>
+        <Text style={[ui.texto, { marginTop: -4, marginBottom: 10 }]}>{`Experiencias de quienes asistieron a eventos de ${evento.organizador.nombre} ${evento.organizador.apellido}`}</Text>
         {resenas.length === 0 && <Vacio icono="chatbox-ellipses-outline" mensaje="Todavía no hay reseñas." />}
         {resenas.map((r) => (
           <View key={r.id} style={ui.card}>
