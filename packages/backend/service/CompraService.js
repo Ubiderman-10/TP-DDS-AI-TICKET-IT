@@ -162,6 +162,19 @@ export class CompraService {
         return this.cambiarEstado(compraId, EstadoCompra.CANCELADA, usuario);
     }
 
+    // Cancelar una compra confirmada y registrar el reembolso en una sola operación.
+    cancelarYReembolsar(compraId, usuarioId) {
+        const compra = this.compraRepository.getById(compraId);
+        if (!compra) {
+            throw new NotFoundError('Compra no encontrada');
+        }
+        if (compra.estado !== EstadoCompra.CONFIRMADA) {
+            throw new BusinessRuleError('Solo se puede cancelar y reembolsar una compra confirmada');
+        }
+        this.cancelar(compraId, usuarioId);
+        return this.reembolsar(compraId, usuarioId);
+    }
+
     // Reembolso (solo de compras canceladas).
     reembolsar(compraId, usuarioId) {
         const compra = this.compraRepository.getById(compraId);
@@ -194,7 +207,12 @@ export class CompraService {
             .filter((c) => c.comprador.id === usuarioId)
             .map((c) => ({
                 id: c.id,
-                evento: { id: c.evento.id, nombre: c.evento.nombre, fecha: c.evento.fecha },
+                evento: {
+                    id: c.evento.id,
+                    nombre: c.evento.nombre,
+                    fecha: c.evento.fecha,
+                    categoria: { id: c.evento.categoria.id, nombre: c.evento.categoria.nombre }
+                },
                 tipoEntrada: { id: c.tipoEntrada.id, nombre: c.tipoEntrada.nombre },
                 cantidad: c.cantidad,
                 total: c.total,

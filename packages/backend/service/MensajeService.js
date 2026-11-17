@@ -23,10 +23,10 @@ export class MensajeService {
             throw new NotFoundError('Compra no encontrada');
         }
         const emisor = this.usuarioRepository.getById(emisorId);
-        this.validarParticipante(compra, emisor);
         if (!emisor) {
             throw new NotFoundError('Emisor no encontrado');
         }
+        this.validarParticipante(compra, emisor);
         const mensaje = new Mensaje({ emisor: emisor, compra: compra, mensaje: texto });
         this.mensajeRepository.save(mensaje);
         compra.agregarMensaje(mensaje);
@@ -40,10 +40,10 @@ export class MensajeService {
             throw new NotFoundError('Compra no encontrada');
         }
         const emisor = this.usuarioRepository.getById(emisorId);
-        this.validarParticipante(compra, emisor);
         if (!emisor) {
             throw new NotFoundError('Emisor no encontrado');
         }
+        this.validarParticipante(compra, emisor);
         const padre = this.mensajeRepository.getById(mensajePadreId);
         if (!padre) {
             throw new NotFoundError('Mensaje a responder no encontrado');

@@ -49,7 +49,7 @@ function entorno() {
     );
     const tipo = evento.tiposEntrada[0];
 
-    return { usuarioService, eventoService, compraService, mensajeService, tipoRepo, categoria, organizador, comprador, tercero, evento, tipo };
+    return { usuarioService, eventoService, compraService, mensajeService, tipoRepo, cambioRepo, categoria, organizador, comprador, tercero, evento, tipo };
 }
 
 // ---------- Crear eventos ----------
@@ -95,6 +95,15 @@ test('CompraService: un usuario AMBOS puede comprar el evento de otro organizado
     const compra = compraService.comprar(ambos.id, evento.id, tipo.id, 2);
     assert.strictEqual(compra.estado, EstadoCompra.PENDIENTE);
     assert.strictEqual(compra.total, 10000);
+});
+
+test('CompraService: las compras del usuario incluyen la categoria del evento', () => {
+    const { compraService, comprador, evento, tipo, categoria } = entorno();
+    compraService.comprar(comprador.id, evento.id, tipo.id, 1);
+
+    const [compra] = compraService.getComprasDelUsuario(comprador.id);
+
+    assert.deepStrictEqual(compra.evento.categoria, { id: categoria.id, nombre: categoria.nombre });
 });
 
 test('CompraService: exige una cantidad entera positiva', () => {
@@ -181,6 +190,51 @@ test('CompraService: cancelar y reembolsar libera el cupo; un tercero no puede r
     assert.throws(() => compraService.reembolsar(compra.id, tercero.id), AuthorizationError);
     assert.strictEqual(compraService.reembolsar(compra.id, comprador.id).estado, EstadoCompra.REEMBOLSADA);
     assert.strictEqual(compraService.disponibilidad(tipo.id), 10);
+});
+
+test('CompraService: cancelar y reembolsar una compra confirmada en una operación', () => {
+    const { compraService, comprador, evento, tipo, cambioRepo } = entorno();
+    const compra = compraService.comprar(comprador.id, evento.id, tipo.id, 4);
+    compraService.confirmar(compra.id, comprador.id);
+    assert.strictEqual(compraService.disponibilidad(tipo.id), 6);
+
+    const resultado = compraService.cancelarYReembolsar(compra.id, comprador.id);
+
+    assert.strictEqual(resultado.estado, EstadoCompra.REEMBOLSADA);
+    assert.strictEqual(compraService.disponibilidad(tipo.id), 10);
+    const historial = cambioRepo.getAll()
+        .filter((cambio) => cambio.compra.id === compra.id)
+        .map((cambio) => cambio.estado);
+    assert.deepStrictEqual(historial.slice(-2), [EstadoCompra.CANCELADA, EstadoCompra.REEMBOLSADA]);
+    assert.throws(
+        () => compraService.cancelarYReembolsar(compra.id, comprador.id),
+        BusinessRuleError
+    );
+});
+
+test('CompraService: operación de cancelar y reembolsar valida antes de cambiar el estado', () => {
+    const { compraService, comprador, tercero, evento, tipo } = entorno();
+    const compra = compraService.comprar(comprador.id, evento.id, tipo.id, 1);
+    assert.throws(
+        () => compraService.cancelarYReembolsar(compra.id, comprador.id),
+        BusinessRuleError
+    );
+    assert.strictEqual(compra.estado, EstadoCompra.PENDIENTE);
+
+    compraService.confirmar(compra.id, comprador.id);
+
+    assert.throws(
+        () => compraService.cancelarYReembolsar(compra.id, tercero.id),
+        AuthorizationError
+    );
+    assert.strictEqual(compra.estado, EstadoCompra.CONFIRMADA);
+
+    evento.fecha = new Date(Date.now() - 1000).toISOString();
+    assert.throws(
+        () => compraService.cancelarYReembolsar(compra.id, comprador.id),
+        BusinessRuleError
+    );
+    assert.strictEqual(compra.estado, EstadoCompra.CONFIRMADA);
 });
 
 test('CompraService: no se puede comprar mas que el cupo disponible', () => {

@@ -10,6 +10,7 @@ import { Categoria } from '../../domain/Categoria.js';
 import { TipoEntrada } from '../../domain/TipoEntrada.js';
 import { Compra } from '../../domain/Compra.js';
 import { EstadoCompra } from '../../domain/EstadoCompra.js';
+import { NotFoundError } from '../../errors/NotFoundError.js';
 
 test('MensajeService: enviar mensaje en una compra', () => {
     const mensajeRepo = new MensajeRepository();
@@ -104,4 +105,28 @@ test('MensajeService: NotFoundError si compra no existe al enviar', () => {
         error = e;
     }
     assert.ok(error, 'Debe lanzar error si la compra no existe');
+});
+
+test('MensajeService: NotFoundError si el emisor no existe al enviar o responder', () => {
+    const mensajeRepo = new MensajeRepository();
+    const compraRepo = new CompraRepository();
+    const usuarioRepo = new UsuarioRepository();
+    const service = new MensajeService(mensajeRepo, compraRepo, usuarioRepo);
+
+    const comprador = usuarioRepo.save(new Usuario({ nombre: 'Comp', apellido: 'Test' }));
+    const org = usuarioRepo.save(new Usuario({ nombre: 'Org', apellido: 'Test' }));
+    const cat = new Categoria({ nombre: 'Musica', descripcion: 'Desc' });
+    const evento = new Evento({
+        nombre: 'Concierto', descripcion: 'Rock', fecha: '2026-12-01', multimedia: [],
+        organizador: org, categoria: cat, tiposEntrada: []
+    });
+    const tipo = new TipoEntrada({ nombre: 'General', descripcion: 'Campo', precio: 5000, cupo: 100 });
+    const compra = new Compra({
+        comprador, evento, tipoEntrada: tipo, cantidad: 1, total: 5000,
+        estado: EstadoCompra.PENDIENTE, mensajes: []
+    });
+    compraRepo.save(compra);
+
+    assert.throws(() => service.enviar(compra.id, 999, 'Hola'), NotFoundError);
+    assert.throws(() => service.responder(compra.id, 999, 'Hola', 1), NotFoundError);
 });

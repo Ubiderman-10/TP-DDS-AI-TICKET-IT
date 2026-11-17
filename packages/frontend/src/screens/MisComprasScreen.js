@@ -57,8 +57,11 @@ export default function MisComprasScreen({ navigation }) {
           text: 'Sí',
           onPress: () =>
             ejecutar(async () => {
-              await comprasService.cancelar(compra.id, usuario.id);
-              if (conReembolso) await comprasService.reembolsar(compra.id, usuario.id);
+              if (conReembolso) {
+                await comprasService.cancelarYReembolsar(compra.id, usuario.id);
+              } else {
+                await comprasService.cancelar(compra.id, usuario.id);
+              }
             }),
         },
       ]

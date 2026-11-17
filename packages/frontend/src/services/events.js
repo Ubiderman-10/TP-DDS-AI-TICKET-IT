@@ -38,6 +38,7 @@ export const comprasService = {
   confirmar: (id, usuarioId) => data(api.put(`/compras/${id}/confirmar`, { usuarioId })),
   utilizar: (id, usuarioId) => data(api.put(`/compras/${id}/utilizar`, { usuarioId })),
   cancelar: (id, usuarioId) => data(api.put(`/compras/${id}/cancelar`, { usuarioId })),
+  cancelarYReembolsar: (id, usuarioId) => data(api.put(`/compras/${id}/cancelar-y-reembolsar`, { usuarioId })),
   reembolsar: (id, usuarioId) => data(api.put(`/compras/${id}/reembolsar`, { usuarioId })),
 };
 

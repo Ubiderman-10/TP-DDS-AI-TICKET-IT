@@ -261,13 +261,18 @@ Cuerpo:
 
 #### `GET /usuarios/{usuarioId}/compras`
 
-**200 OK** — Compras del usuario. `diasFaltantes` son los días que faltan para el evento (negativo si ya ocurrió).
+**200 OK** — Compras del usuario. Cada evento incluye su categoría para la presentación en la interfaz. `diasFaltantes` son los días que faltan para el evento (negativo si ya ocurrió).
 
 ```json
 [
   {
     "id": 1,
-    "evento": { "id": 2, "nombre": "Hamlet", "fecha": "2026-11-24T17:58:05.337Z" },
+    "evento": {
+      "id": 2,
+      "nombre": "Hamlet",
+      "fecha": "2026-11-24T17:58:05.337Z",
+      "categoria": { "id": 2, "nombre": "Teatro" }
+    },
     "tipoEntrada": { "id": 3, "nombre": "Platea" },
     "cantidad": 2,
     "total": 16000,
@@ -471,6 +476,7 @@ Cuerpo:
 | PUT | `/compras/{compraId}/confirmar` | Confirmar una compra (simula pago). Comprador u organizador. |
 | PUT | `/compras/{compraId}/utilizar` | Marcar compra como utilizada. Solo el organizador del evento. |
 | PUT | `/compras/{compraId}/cancelar` | Cancelar compra. Solo el comprador. |
+| PUT | `/compras/{compraId}/cancelar-y-reembolsar` | Cancelar y reembolsar una compra confirmada en una sola operación. Solo el comprador. |
 | PUT | `/compras/{compraId}/reembolsar` | Reembolsar una compra cancelada. Comprador u organizador. |
 | GET | `/usuarios/{usuarioId}/compras` | Ver compras de un usuario (documentado en *Usuarios*). |
 | GET | `/eventos/{eventoId}/compras` | Ver compras de un evento y disponibilidad. |
@@ -619,7 +625,7 @@ Cuerpo:
 
 #### `PUT /compras/{compraId}/cancelar`
 
-Cancela la compra y libera el cupo. Solo lo puede hacer el comprador, solo si la compra está `Pendiente` o `Confirmada` y el evento todavía no ocurrió.
+Cancela la compra y libera el cupo, dejándola en estado `Cancelada`. Solo lo puede hacer el comprador, si la compra está `Pendiente` o `Confirmada` y el evento todavía no ocurrió. Para cancelar una compra confirmada y reembolsarla en una sola solicitud, usar `PUT /compras/{compraId}/cancelar-y-reembolsar`.
 
 Cuerpo:
 
@@ -661,9 +667,37 @@ Cuerpo:
 
 **500 Internal Server Error** — Error inesperado del servidor.
 
+#### `PUT /compras/{compraId}/cancelar-y-reembolsar`
+
+Cancela y reembolsa una compra `Confirmada` en una sola solicitud. Solo lo puede hacer el comprador y antes de la fecha y hora del evento. La respuesta se envía cuando se registraron ambos cambios de estado.
+
+Cuerpo:
+
+```json
+{ "usuarioId": 3 }
+```
+
+**200 OK** — Devuelve la compra con `estado: "Reembolsada"`.
+
+**403 Forbidden** — El usuario no es el comprador de la compra.
+
+```json
+{ "error": true, "message": "Solo el comprador puede cancelar la compra", "code": "AUTHORIZATION_ERROR" }
+```
+
+**404 Not Found** — Compra o usuario no encontrado.
+
+**409 Conflict** — La compra no está `Confirmada` o el evento ya ocurrió.
+
+```json
+{ "error": true, "message": "Solo se puede cancelar y reembolsar una compra confirmada", "code": "BUSINESS_RULE_ERROR" }
+```
+
+**500 Internal Server Error** — Error inesperado del servidor.
+
 #### `PUT /compras/{compraId}/reembolsar`
 
-Reembolsa una compra que ya está `Cancelada`. Lo pueden hacer el comprador o el organizador del evento.
+Reembolsa una compra que ya está `Cancelada`. Lo pueden hacer el comprador o el organizador del evento. Este endpoint sigue disponible para reembolsar cancelaciones ya registradas; para cancelar y reembolsar una compra confirmada desde una sola solicitud, usar `PUT /compras/{compraId}/cancelar-y-reembolsar`.
 
 Cuerpo:
 
@@ -738,10 +772,10 @@ Cuerpo:
 
 #### `GET /tipos-entrada/{tipoEntradaId}/disponibilidad`
 
-**200 OK** — Disponibilidad de un tipo de entrada.
+**200 OK** — `disponibles` es el cupo menos las entradas vendidas activas (las compras canceladas o reembolsadas no ocupan cupo).
 
 ```json
-{ "tipoEntradaId": 1, "nombre": "General", "cupo": 100, "vendidas": 2, "disponibles": 98 }
+{ "tipoEntradaId": 1, "disponibles": 98 }
 ```
 
 **404 Not Found** — Tipo de entrada no encontrado.

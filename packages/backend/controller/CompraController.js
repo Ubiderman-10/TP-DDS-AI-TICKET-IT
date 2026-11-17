@@ -81,6 +81,19 @@ export class CompraController {
         }
     }
 
+    // PUT /compras/:compraId/cancelar-y-reembolsar  body: { usuarioId }
+    cancelarYReembolsar(req, res, next) {
+        try {
+            const compra = this.compraService.cancelarYReembolsar(
+                Number(req.params.compraId),
+                Number(req.body.usuarioId)
+            );
+            res.status(200).json({ data: this._compraDTO(compra) });
+        } catch (err) {
+            next(err);
+        }
+    }
+
     // PUT /compras/:compraId/reembolsar  body: { usuarioId }
     reembolsar(req, res, next) {
         try {
