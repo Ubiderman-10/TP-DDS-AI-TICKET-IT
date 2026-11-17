@@ -9,14 +9,14 @@ Plataforma para **venta de entradas a eventos** (recitales, conciertos, teatro, 
 
 La API REST está definida bajo la base `http://localhost:3000/api`.
 
-Cada `Usuario` tiene un **rol** (`ORGANIZADOR`, `COMPRADOR` o `AMBOS`) que define qué puede hacer. Ver la sección *Roles y permisos*.
+Cada `Usuario` tiene un **rol** (`ORGANIZADOR`, `COMPRADOR` o `AMBOS`) que define qué puede hacer. Ver la sección *Roles y permisos*. El endpoint de salud `/health` devuelve `{ "ok": true }` directamente, sin el envoltorio `data` usado por el resto de respuestas exitosas.
 
 ## Información general
 
 | Aspecto | Detalle |
 | --- | --- |
 | Entorno | `http://localhost:3000/api` |
-| Documentación interactiva | No disponible: Swagger no está conectado a la app (ver *Documentación Swagger*). Esta guía es la referencia. |
+| Documentación interactiva | Swagger UI en `http://localhost:3000/api-docs`; especificación OpenAPI en `http://localhost:3000/api-docs/openapi.json`. |
 | Gitignore recomendado | `node_modules`, `*.log`, `.env` |
 | Persistencia | En memoria (arrays) en `repository/`. Al reiniciar el servidor se pierden los datos. |
 | Datos de ejemplo | `npm start` carga `seed.js` (usuarios, categorías y eventos de prueba). Los tests no lo usan. |
@@ -114,6 +114,16 @@ El diagrama de clases tentativo define un único `Usuario` sin rol. Se agregó e
 ---
 
 ## Endpoints
+
+### Estado del servicio
+
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| GET | `/health` | Verificar que la API está disponible. |
+
+#### `GET /health`
+
+**200 OK** — `{ "ok": true }`.
 
 ### 1. Categorías
 
@@ -1003,9 +1013,11 @@ Además de los casos de dominio y servicio, hay tests específicos de:
 
 ## Documentación Swagger
 
-Los archivos de `docs/` (`swagger.js` y `docs/api/*.yaml`) son un borrador y **no están conectados a la app**: `swagger-ui-express` no está instalado y `app.js` no monta `/api-docs`. La referencia vigente de la API es este documento.
+Con el backend en ejecución, la documentación interactiva está disponible en `http://localhost:3000/api-docs`. La especificación OpenAPI que utiliza Swagger UI se sirve también en `http://localhost:3000/api-docs/openapi.json`.
 
-Los archivos de referencia de la documentación local están en:
+La especificación cubre las rutas actuales de la API. Esta guía (`API.md`) conserva ejemplos y reglas de negocio con más detalle. Los archivos `docs/api/*.yaml` son borradores parciales y no se cargan en Swagger UI. El código de la especificación activa está en `docs/swagger.js`.
+
+Los borradores parciales de la documentación local están en:
 
 ```
 packages/backend/docs/

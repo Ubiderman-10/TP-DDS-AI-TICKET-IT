@@ -64,6 +64,6 @@ El comando ejecuta los tests del backend con el runner integrado de Node (`node 
 
 ## Documentación
 
-La referencia de endpoints y reglas de negocio está en [packages/backend/API.md](packages/backend/API.md). Los datos del backend se guardan en memoria y se reinician al volver a iniciar el servidor.
+La referencia de endpoints y reglas de negocio está en [packages/backend/API.md](packages/backend/API.md). Con el backend iniciado, la documentación interactiva está disponible en `http://localhost:3000/api-docs` y la especificación OpenAPI en `http://localhost:3000/api-docs/openapi.json`. Los datos del backend se guardan en memoria y se reinician al volver a iniciar el servidor.
 
 El proyecto no implementa autenticación real; los identificadores de usuario enviados a la API se usan para representar los roles y permisos dentro del alcance académico.

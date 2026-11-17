@@ -1,6 +1,7 @@
 import express from 'express';
 import { errorHandler } from './middleware/errorHandler.js';
 import { NotFoundError } from './errors/NotFoundError.js';
+import { setupSwagger } from './docs/swagger.js';
 
 // Repositorios (persistencia en memoria)
 import { CategoriaRepository } from './repository/CategoriaRepository.js';
@@ -91,6 +92,8 @@ app.use('/api/eventos', createEventoRouter(eventoController, tipoEntradaControll
 app.use('/api/tipos-entrada', createTipoEntradaRouter(compraController));
 app.use('/api/compras', createCompraRouter(compraController, mensajeController));
 app.use('/api/organizadores', createOrganizadorRouter(eventoController, resenaController));
+
+setupSwagger(app);
 
 // Ruta inexistente -> 404 en formato JSON
 app.use((req, res, next) => {
