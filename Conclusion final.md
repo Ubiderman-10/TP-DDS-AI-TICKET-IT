@@ -22,7 +22,7 @@ Verificación: revisó el proyecto completo contra la consigna y el diagrama de 
 
 Generación y optimización de código: produjo código nuevo y reescribió partes existentes (reglas de negocio, pantallas, tests y documentación), centralizando estilos y componentes reutilizables para reducir la duplicación y simplificar el código.
 
-Copilot, integrado en VS Code, lo usé en la etapa final para revisar y corregir problemas concretos sin volver a generar el proyecto completo. Me ayudó a reforzar validaciones de eventos, entradas y reseñas; corregir errores de manejo de usuarios en el chat; resolver el flujo de cancelación y reembolso en una sola solicitud; y alinear respuestas del backend, pantallas y documentación. También ayudó a eliminar un componente duplicado que no se usaba y a ordenar la configuración de los paquetes. Los cambios se fueron comprobando con tests, compilación web y solicitudes HTTP.
+Copilot, integrado en VS Code, lo usé en la etapa final para revisar y corregir problemas concretos sin volver a generar el proyecto completo. Me ayudó a reforzar validaciones de eventos, entradas y reseñas; corregir errores de manejo de usuarios en el chat; resolver el flujo de cancelación y reembolso en una sola solicitud; y alinear respuestas del backend, pantallas y documentación. También ayudó a eliminar un componente duplicado que no se usaba, ordenar la configuración de los paquetes y conectar Swagger UI con la especificación OpenAPI de las rutas. Los cambios se fueron comprobando con tests, compilación web y solicitudes HTTP.
 
 La mayor parte del código fue generada por estas herramientas, como propone la consigna. Mi trabajo consistió en dirigirlas, tomar las decisiones de diseño y de producto, probar la aplicación en el celular y verificar cada resultado contra la consigna y el diagrama de clases. Trabajé con cambios chicos: aplicaba un cambio, lo probaba y recién después pasaba al siguiente.
 
@@ -48,7 +48,7 @@ La mayor parte del código fue generada por estas herramientas, como propone la 
 
 - Aprendizaje de tecnologías nuevas. Poder preguntar por qué algo fallaba, y no solo recibir la solución, me ayudó a entender cómo se organiza una aplicación móvil: navegación, estado, consumo de una API.
 
-- Trabajo que habría dejado para el final o directamente omitido. Con la IA agregué reglas de negocio más completas, un rediseño visual de toda la aplicación, selectores nativos de fecha y hora, documentación de la API y tests: pasé de 40 a 79 tests automáticos, incluyendo pruebas de permisos por rol, validaciones y ordenamiento.
+- Trabajo que habría dejado para el final o directamente omitido. Con la IA agregué reglas de negocio más completas, un rediseño visual de toda la aplicación, selectores nativos de fecha y hora, documentación de la API y tests: pasé de 40 a 80 tests automáticos, incluyendo pruebas de permisos por rol, validaciones, ordenamiento e integración de Swagger.
 
 - Complementarse entre herramientas. El agente fue útil para generar mucho código de una vez, con continuidad gracias a poder cambiar de modelo cuando se agotaba uno, y con el modo Plan para revisar la estrategia antes de ejecutarla. El asistente conversacional fue más útil para diagnosticar problemas puntuales y avanzar en pasos pequeños y controlados.
 
@@ -63,7 +63,7 @@ La mayor parte del código fue generada por estas herramientas, como propone la 
 
 - Configuración inconsistente. El comando de tests apuntaba a una herramienta (Jest) distinta de la que usaban los tests (el ejecutor nativo de Node), y el manifiesto raíz tenía una configuración vieja de Expo que no correspondía a la aplicación real. En la revisión final se ordenaron los comandos del proyecto y se quitaron Jest y Babel-Jest del backend; los tests se ejecutan con `node --test`.
 
-- Documentación que contradecía el código. En una primera revisión encontré rutas, códigos de error y reglas de permisos que no coincidían con la implementación. También la respuesta documentada para consultar disponibilidad incluía campos que el endpoint no devuelve. Durante la revisión final actualicé `API.md` para reflejar esa respuesta y documentar las reglas de negocio y el flujo de cancelación y reembolso. Aprendí que los ejemplos de la documentación también hay que contrastarlos con la API real.
+- Documentación que contradecía el código. En una primera revisión encontré rutas, códigos de error y reglas de permisos que no coincidían con la implementación. También la respuesta documentada para consultar disponibilidad incluía campos que el endpoint no devuelve. Durante la revisión final actualicé `API.md` para reflejar esa respuesta y documentar las reglas de negocio y el flujo de cancelación y reembolso; además, conecté Swagger UI para explorar la especificación OpenAPI de las rutas actuales. Aprendí que los ejemplos de la documentación también hay que contrastarlos con la API real.
 
 - Errores introducidos por la propia IA al corregir. Por ejemplo, un error en el selector de cantidad de entradas que reiniciaba el valor al llegar al máximo, un error de renderizado en el chat por una importación mal resuelta, y un guion de pruebas mal armado que yo seguí y que me llevó a conclusiones equivocadas hasta que lo noté.
 
