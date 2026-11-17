@@ -5,6 +5,18 @@ import { Usuario } from '../../domain/Usuario.js';
 import { Categoria } from '../../domain/Categoria.js';
 import { TipoEntrada } from '../../domain/TipoEntrada.js';
 
+function crearEvento(fecha) {
+    return new Evento({
+        nombre: 'Evento',
+        descripcion: 'Desc',
+        fecha,
+        multimedia: [],
+        organizador: new Usuario({ nombre: 'Org', apellido: 'Test' }),
+        categoria: new Categoria({ nombre: 'Cat', descripcion: 'Desc' }),
+        tiposEntrada: []
+    });
+}
+
 test('Evento: tuPrecioEstaEntre retorna true si el precio esta en rango', () => {
     const organizador = new Usuario({ nombre: 'Org', apellido: 'Test' });
     const categoria = new Categoria({ nombre: 'Cat', descripcion: 'Desc' });
@@ -23,4 +35,14 @@ test('Evento: tuPrecioEstaEntre retorna true si el precio esta en rango', () => 
     assert.strictEqual(e.tuPrecioEstaEntre(1000, 5000), true);
     assert.strictEqual(e.tuPrecioEstaEntre(500, 999), false);
     assert.strictEqual(e.tuPrecioEstaEntre(5001, 9999), false);
+});
+
+test('Evento: yaOcurrio compara fechas Date e ISO usando el instante actual', () => {
+    const ahora = new Date();
+    const pasada = new Date(ahora.getTime() - 1000);
+    const futura = new Date(ahora.getTime() + 1000);
+
+    assert.strictEqual(crearEvento(pasada.toISOString()).yaOcurrio(ahora), true);
+    assert.strictEqual(crearEvento(futura).yaOcurrio(ahora), false);
+    assert.strictEqual(crearEvento(ahora.toISOString()).yaOcurrio(ahora), true);
 });

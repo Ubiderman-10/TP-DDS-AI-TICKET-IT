@@ -97,6 +97,17 @@ test('CompraService: un usuario AMBOS puede comprar el evento de otro organizado
     assert.strictEqual(compra.total, 10000);
 });
 
+test('CompraService: exige una cantidad entera positiva', () => {
+    const { compraService, comprador, evento, tipo } = entorno();
+
+    for (const cantidad of [0, -1, 1.5, NaN, Infinity]) {
+        assert.throws(
+            () => compraService.comprar(comprador.id, evento.id, tipo.id, cantidad),
+            ValidationError
+        );
+    }
+});
+
 // ---------- Transiciones de estado y permisos ----------
 
 test('CompraService: confirmar solo lo hacen el comprador o el organizador, y solo desde PENDIENTE', () => {
@@ -125,6 +136,9 @@ test('CompraService: solo el organizador del evento marca la entrada como utiliz
     compraService.confirmar(compra.id, comprador.id);
     // el comprador no puede marcarse su propia entrada como usada
     assert.throws(() => compraService.marcarUtilizada(compra.id, comprador.id), AuthorizationError);
+
+    assert.throws(() => compraService.marcarUtilizada(compra.id, organizador.id), BusinessRuleError);
+    evento.fecha = new Date(Date.now() - 1000).toISOString();
     assert.strictEqual(compraService.marcarUtilizada(compra.id, organizador.id).estado, EstadoCompra.UTILIZADA);
 });
 
@@ -132,7 +146,17 @@ test('CompraService: una compra UTILIZADA no se puede cancelar', () => {
     const { compraService, comprador, organizador, evento, tipo } = entorno();
     const compra = compraService.comprar(comprador.id, evento.id, tipo.id, 1);
     compraService.confirmar(compra.id, comprador.id);
+    evento.fecha = new Date(Date.now() - 1000).toISOString();
     compraService.marcarUtilizada(compra.id, organizador.id);
+    assert.throws(() => compraService.cancelar(compra.id, comprador.id), BusinessRuleError);
+});
+
+test('CompraService: no permite cancelar después de la fecha del evento', () => {
+    const { compraService, comprador, evento, tipo } = entorno();
+    const compra = compraService.comprar(comprador.id, evento.id, tipo.id, 1);
+    compraService.confirmar(compra.id, comprador.id);
+    evento.fecha = new Date(Date.now() - 1000).toISOString();
+
     assert.throws(() => compraService.cancelar(compra.id, comprador.id), BusinessRuleError);
 });
 

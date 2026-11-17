@@ -2,6 +2,7 @@ import { Evento } from '../domain/Evento.js';
 import { TipoEntrada } from '../domain/TipoEntrada.js';
 import { NotFoundError } from '../errors/NotFoundError.js';
 import { AuthorizationError } from '../errors/AuthorizationError.js';
+import { ValidationError } from '../errors/ValidationError.js';
 import { puedeOrganizar } from '../domain/RolUsuario.js';
 
 export class EventoService {
@@ -25,6 +26,13 @@ export class EventoService {
         const categoria = this.categoriaRepository.getById(categoriaId);
         if (!categoria) {
             throw new NotFoundError('Categoria no encontrada');
+        }
+        const fechaEvento = new Date(datos.fecha);
+        if (!Number.isFinite(fechaEvento.getTime())) {
+            throw new ValidationError('El evento debe tener una fecha válida');
+        }
+        if (fechaEvento.getTime() <= Date.now()) {
+            throw new ValidationError('La fecha del evento debe ser futura');
         }
         const tipos = (tiposEntrada || []).map((t) => new TipoEntrada(t));
         const evento = new Evento({ ...datos, categoria: categoria, organizador: organizador, tiposEntrada: tipos });

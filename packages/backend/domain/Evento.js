@@ -47,7 +47,7 @@ export class Evento {
         return precioMinimo >= minimo && precioMinimo <= maximo;
     }
 
-    yaOcurrio(fechaActual) {
-        return this.fecha < fechaActual;
+    yaOcurrio(fechaActual = new Date()) {
+        return new Date(this.fecha).getTime() <= new Date(fechaActual).getTime();
     }
 }

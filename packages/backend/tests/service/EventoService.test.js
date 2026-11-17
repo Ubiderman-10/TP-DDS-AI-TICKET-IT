@@ -8,6 +8,7 @@ import { UsuarioRepository } from '../../repository/UsuarioRepository.js';
 import { ReseñaRepository } from '../../repository/ReseñaRepository.js';
 import { Categoria } from '../../domain/Categoria.js';
 import { Usuario } from '../../domain/Usuario.js';
+import { ValidationError } from '../../errors/ValidationError.js';
 
 test('EventoService: crear evento con organizador y categoria', async () => {
     const eventoRepo = new EventoRepository();
@@ -34,6 +35,26 @@ test('EventoService: crear evento con organizador y categoria', async () => {
     assert.strictEqual(evento.nombre, 'Concierto');
     assert.strictEqual(evento.tiposEntrada.length, 1);
     assert.strictEqual(evento.tiposEntrada[0].nombre, 'General');
+});
+
+test('EventoService: rechaza eventos con fecha pasada o inválida', () => {
+    const eventoRepo = new EventoRepository();
+    const categoriaRepo = new CategoriaRepository();
+    const usuarioRepo = new UsuarioRepository();
+    const service = new EventoService(eventoRepo, categoriaRepo, usuarioRepo, new ReseñaRepository());
+    const org = usuarioRepo.save(new Usuario({ nombre: 'Org', apellido: 'Test' }));
+    const cat = categoriaRepo.save(new Categoria({ nombre: 'Musica', descripcion: 'Desc' }));
+    const datos = { nombre: 'Evento', descripcion: 'Desc', multimedia: [] };
+
+    assert.throws(
+        () => service.crearEvento({ ...datos, fecha: new Date(Date.now() - 1000) }, org.id, cat.id),
+        ValidationError
+    );
+    assert.throws(
+        () => service.crearEvento({ ...datos, fecha: new Date('invalid') }, org.id, cat.id),
+        ValidationError
+    );
+    assert.strictEqual(eventoRepo.getAll().length, 0);
 });
 
 test('EventoService: buscar filtra por texto', async () => {

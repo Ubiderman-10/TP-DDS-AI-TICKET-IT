@@ -11,7 +11,7 @@ export class ReseñaService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    // Calificar un evento (solo si el comprador utilizo su entrada).
+    // Calificar una sola vez por evento, después de usar la entrada y llegar la fecha programada.
     calificar(compradorId, eventoId, puntuacion, detalle) {
         const comprador = this.usuarioRepository.getById(compradorId);
         if (!comprador) {
@@ -29,6 +29,15 @@ export class ReseñaService {
             );
         if (!utilizoEntrada) {
             throw new BusinessRuleError('Solo se puede calificar una vez utilizada la entrada');
+        }
+        if (!evento.yaOcurrio()) {
+            throw new BusinessRuleError('Solo se puede calificar una vez alcanzada la fecha y hora del evento');
+        }
+        const yaCalifico = this.resenaRepository.getAll().some(
+            (r) => r.comprador.id === compradorId && r.evento.id === eventoId
+        );
+        if (yaCalifico) {
+            throw new BusinessRuleError('Solo se permite una reseña por comprador y evento');
         }
         const resena = new Reseña({ comprador: comprador, evento: evento, puntuacion: puntuacion, detalle: detalle });
         this.resenaRepository.save(resena);

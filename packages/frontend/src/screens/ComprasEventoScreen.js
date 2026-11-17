@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { comprasService } from '../services/events';
+import { comprasService, eventosService } from '../services/events';
 import { getUsuario } from '../session';
 import EstadoBadge from '../components/EstadoBadge';
 import Avatar from '../components/Avatar';
@@ -23,14 +23,26 @@ export default function ComprasEventoScreen({ route, navigation }) {
   const { eventoId } = route.params;
   const usuario = getUsuario();
   const [datos, setDatos] = useState(null);
+  const [fechaEvento, setFechaEvento] = useState(null);
+  const [ahora, setAhora] = useState(Date.now());
 
   const cargar = useCallback(async () => {
     try {
-      setDatos(await comprasService.listarPorEvento(eventoId));
+      const [compras, evento] = await Promise.all([
+        comprasService.listarPorEvento(eventoId),
+        eventosService.obtener(eventoId),
+      ]);
+      setDatos(compras);
+      setFechaEvento(evento.fecha);
     } catch (error) {
       Alert.alert('Error', error.message);
     }
   }, [eventoId]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setAhora(Date.now()), 30000);
+    return () => clearInterval(timer);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -54,6 +66,8 @@ export default function ComprasEventoScreen({ route, navigation }) {
       </View>
     );
   }
+
+  const puedeMarcarUtilizada = fechaEvento && new Date(fechaEvento).getTime() <= ahora;
 
   return (
     <ScrollView style={ui.pantalla} contentContainerStyle={ui.lista}>
@@ -85,8 +99,11 @@ export default function ComprasEventoScreen({ route, navigation }) {
             {c.estado === ESTADO.PENDIENTE && (
               <Boton icono="card-outline" texto="Confirmar pago" estilo={ui.botonOk} onPress={() => ejecutar(() => comprasService.confirmar(c.id, usuario.id))} />
             )}
-            {c.estado === ESTADO.CONFIRMADA && (
+            {c.estado === ESTADO.CONFIRMADA && puedeMarcarUtilizada && (
               <Boton icono="checkmark-done" texto="Marcar utilizada" estilo={ui.botonOk} onPress={() => ejecutar(() => comprasService.utilizar(c.id, usuario.id))} />
+            )}
+            {c.estado === ESTADO.CONFIRMADA && !puedeMarcarUtilizada && (
+              <Text style={ui.texto}>Podrás marcar la entrada como utilizada cuando llegue la fecha del evento.</Text>
             )}
             <Boton icono="chatbubbles-outline" texto="Chat" estilo={{ backgroundColor: '#475569' }} onPress={() => navigation.navigate('ChatCompra', { compraId: c.id })} />
           </View>

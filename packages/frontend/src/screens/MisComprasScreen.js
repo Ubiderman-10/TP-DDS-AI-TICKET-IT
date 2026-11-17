@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { comprasService } from '../services/events';
@@ -11,6 +11,12 @@ export default function MisComprasScreen({ navigation }) {
   const usuario = getUsuario();
   const [compras, setCompras] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [ahora, setAhora] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setAhora(Date.now()), 30000);
+    return () => clearInterval(timer);
+  }, []);
 
   const cargar = useCallback(async () => {
     try {
@@ -77,6 +83,7 @@ export default function MisComprasScreen({ navigation }) {
       renderItem={({ item }) => (
         <CompraItem
           compra={item}
+          ahora={ahora}
           onPagar={() => pagar(item)}
           onCancelar={() => cancelar(item)}
           onChat={() => navigation.navigate('ChatCompra', { compraId: item.id })}

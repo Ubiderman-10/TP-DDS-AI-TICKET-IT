@@ -308,7 +308,7 @@ Query params opcionales:
     "id": 1,
     "nombre": "Confeti Fest",
     "descripcion": "Festival de confeti",
-    "fecha": "2026-10-20T20:00:00.000Z",
+    "fecha": "2026-12-20T20:00:00.000Z",
     "categoria": { "id": 1, "nombre": "Música", "descripcion": "Eventos musicales" },
     "organizador": { "id": 1, "nombre": "Organizador 1", "apellido": "Apellido" },
     "multimedia": ["https://ejemplo.com/confeti.jpg"],
@@ -331,7 +331,7 @@ Query params opcionales:
   "id": 1,
   "nombre": "Confeti Fest",
   "descripcion": "Festival de confeti",
-  "fecha": "2026-10-20T20:00:00.000Z",
+  "fecha": "2026-12-20T20:00:00.000Z",
   "categoria": { "id": 1, "nombre": "Música", "descripcion": "Eventos musicales" },
   "organizador": { "id": 1, "nombre": "Organizador 1", "apellido": "Apellido" },
   "multimedia": ["https://ejemplo.com/confeti.jpg"],
@@ -358,7 +358,7 @@ Cuerpo:
 {
   "nombre": "Concierto Rock",
   "descripcion": "Concierto de rock nacional",
-  "fecha": "2026-11-05T21:00:00.000Z",
+  "fecha": "2026-12-05T21:00:00.000Z",
   "categoriaId": 1,
   "organizadorId": 1,
   "multimedia": ["https://ejemplo.com/rock.jpg"],
@@ -376,7 +376,7 @@ Cuerpo:
   "id": 2,
   "nombre": "Concierto Rock",
   "descripcion": "Concierto de rock nacional",
-  "fecha": "2026-11-05T21:00:00.000Z",
+  "fecha": "2026-12-05T21:00:00.000Z",
   "categoria": { "id": 1, "nombre": "Música", "descripcion": "Eventos musicales" },
   "organizador": { "id": 1, "nombre": "Organizador 1", "apellido": "Apellido" },
   "multimedia": ["https://ejemplo.com/rock.jpg"],
@@ -387,7 +387,7 @@ Cuerpo:
 }
 ```
 
-**400 Bad Request** — Campos faltantes o inválidos (nombre, descripción, fecha válida).
+**400 Bad Request** — Campos faltantes o inválidos (nombre, descripción, fecha válida y futura; precio finito mayor a 0 y cupo entero mayor a 0 para cada tipo de entrada).
 
 ```json
 { "error": true, "message": "El Evento debe tener un nombre y una descripción", "code": "VALIDATION_ERROR" }
@@ -448,7 +448,7 @@ Cuerpo:
 { "id": 3, "nombre": "Platea", "descripcion": "Platea baja", "precio": 3500, "cupo": 80 }
 ```
 
-**400 Bad Request** — Campos faltantes o inválidos (nombre, precio, cupo).
+**400 Bad Request** — Campos faltantes o inválidos (nombre, precio finito mayor a 0 y cupo entero mayor a 0).
 
 ```json
 { "error": true, "message": "nombre, descripcion, precio y cupo son requeridos", "code": "VALIDATION_ERROR" }
@@ -503,7 +503,7 @@ Cuerpo:
 }
 ```
 
-**400 Bad Request** — Cantidad inválida (≤ 0) o campos faltantes.
+**400 Bad Request** — Cantidad inválida (debe ser un entero mayor a 0) o campos faltantes.
 
 ```json
 { "error": true, "message": "La cantidad debe ser mayor a 0", "code": "VALIDATION_ERROR" }
@@ -589,7 +589,7 @@ Cuerpo:
 {
   "id": 1,
   "comprador": { "id": 3, "nombre": "Carlos", "apellido": "Comprador" },
-  "evento": { "id": 2, "nombre": "Hamlet", "fecha": "2026-11-24T17:58:05.337Z" },
+  "evento": { "id": 2, "nombre": "Hamlet", "fecha": "2026-11-10T17:58:05.337Z" },
   "tipoEntrada": { "id": 3, "nombre": "Platea", "precio": 8000, "cupo": 50 },
   "cantidad": 2,
   "total": 16000,
@@ -609,7 +609,7 @@ Cuerpo:
 { "error": true, "message": "Compra no encontrada", "code": "NOT_FOUND" }
 ```
 
-**409 Conflict** — La compra no está `Confirmada`.
+**409 Conflict** — La compra no está `Confirmada` o todavía no llegó la fecha y hora del evento.
 
 ```json
 { "error": true, "message": "Solo se puede utilizar una compra confirmada", "code": "BUSINESS_RULE_ERROR" }
@@ -897,7 +897,7 @@ Cuerpo:
 { "error": true, "message": "La puntuacion debe ser un numero entero entre 1 y 5 inclusive", "code": "VALIDATION_ERROR" }
 ```
 
-**409 Conflict** — El comprador no tiene una compra `Utilizada` para este evento.
+**409 Conflict** — El comprador no tiene una compra `Utilizada` para este evento, todavía no llegó la fecha y hora programadas o ya publicó una reseña para el evento.
 
 ```json
 { "error": true, "message": "Solo se puede calificar una vez utilizada la entrada", "code": "BUSINESS_RULE_ERROR" }
@@ -936,17 +936,18 @@ Cuerpo:
 
 ## Validaciones de negocio principales
 
-1. **Cupo**: no se puede vender más entradas de las disponibles. Una compra cancelada o reembolsada libera su cupo.
-2. **Estado de compra**:
+1. **Cupo y cantidades**: no se puede vender más entradas de las disponibles; la cantidad debe ser un entero positivo. Una compra cancelada o reembolsada libera su cupo.
+2. **Eventos y tipos de entrada**: la fecha del evento debe ser futura; el precio debe ser finito y mayor a 0, y el cupo un entero positivo.
+3. **Estado de compra**:
    - Se puede confirmar solo si está `Pendiente` (comprador u organizador).
-   - Se puede marcar como utilizada solo si está `Confirmada` (solo el organizador del evento).
+   - Se puede marcar como utilizada solo si está `Confirmada` y ya llegó la fecha y hora programadas (solo el organizador del evento).
    - Se puede cancelar solo si está `Pendiente` o `Confirmada` y el evento aún no ocurrió (solo el comprador).
    - Se puede reembolsar solo si está `Cancelada` (comprador u organizador).
-3. **Roles**: solo un organizador crea eventos; solo un comprador compra y guarda favoritos; nadie compra entradas de su propio evento.
-4. **Reseña**: solo si el comprador tiene una compra `Utilizada` para ese evento.
-5. **Favoritos**: el usuario puede tener múltiples favoritos, sin repetir el mismo evento.
-6. **Chat**: solo el comprador y el organizador de la compra pueden escribir, en cualquier estado de la compra.
-7. **Categorías**: el nombre no se puede repetir.
+4. **Roles**: solo un organizador crea eventos; solo un comprador compra y guarda favoritos; nadie compra entradas de su propio evento.
+5. **Reseña**: solo si el comprador tiene una compra `Utilizada` para ese evento y ya llegó la fecha y hora programadas. Cada comprador puede dejar una reseña por evento.
+6. **Favoritos**: el usuario puede tener múltiples favoritos, sin repetir el mismo evento.
+7. **Chat**: solo el comprador y el organizador de la compra pueden escribir, en cualquier estado de la compra.
+8. **Categorías**: el nombre no se puede repetir.
 
 ## Tests
 

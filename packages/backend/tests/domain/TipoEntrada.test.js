@@ -24,3 +24,21 @@ test('TipoEntrada: hayCupoPara retorna false si se excede', () => {
 test('TipoEntrada: lanza ValidationError si falta un campo', () => {
     assert.throws(() => new TipoEntrada({ nombre: 'General', precio: 5000 }), ValidationError);
 });
+
+test('TipoEntrada: rechaza precios que no sean finitos y positivos', () => {
+    for (const precio of [0, -1, NaN, Infinity, '5000']) {
+        assert.throws(
+            () => new TipoEntrada({ nombre: 'General', descripcion: 'Campo', precio, cupo: 10 }),
+            ValidationError
+        );
+    }
+});
+
+test('TipoEntrada: exige un cupo entero positivo', () => {
+    for (const cupo of [0, -1, 1.5, NaN, Infinity, '10']) {
+        assert.throws(
+            () => new TipoEntrada({ nombre: 'General', descripcion: 'Campo', precio: 5000, cupo }),
+            ValidationError
+        );
+    }
+});

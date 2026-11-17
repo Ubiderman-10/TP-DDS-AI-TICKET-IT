@@ -76,8 +76,8 @@ export class CompraService {
         if (!evento.tiposEntrada.some((t) => t.id === tipoEntradaId)) {
             throw new ValidationError('El tipo de entrada no pertenece al evento');
         }
-        if (cantidad <= 0) {
-            throw new ValidationError('La cantidad debe ser mayor a 0');
+        if (!Number.isInteger(cantidad) || cantidad <= 0) {
+            throw new ValidationError('La cantidad debe ser un número entero mayor a 0');
         }
         if (evento.organizador.id === compradorId) {
             throw new BusinessRuleError('No podes comprar entradas de tu propio evento');
@@ -136,6 +136,9 @@ export class CompraService {
         }
         if (compra.estado !== EstadoCompra.CONFIRMADA) {
             throw new BusinessRuleError('Solo se puede utilizar una compra confirmada');
+        }
+        if (!compra.evento.yaOcurrio()) {
+            throw new BusinessRuleError('Solo se puede utilizar una entrada desde la fecha y hora del evento');
         }
         return this.cambiarEstado(compraId, EstadoCompra.UTILIZADA, usuario);
     }

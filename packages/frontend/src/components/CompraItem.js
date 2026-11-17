@@ -29,9 +29,11 @@ function Boton({ icono, texto, onPress, estilo }) {
   );
 }
 
-export default function CompraItem({ compra, onPagar, onCancelar, onChat, onCalificar }) {
+export default function CompraItem({ compra, onPagar, onCancelar, onChat, onCalificar, ahora = Date.now() }) {
   const dias = textoDias(compra.diasFaltantes);
   const visual = visualCategoria(compra.evento.categoria?.nombre);
+  const fechaEvento = new Date(compra.evento.fecha).getTime();
+  const puedeCalificar = compra.estado === ESTADO.UTILIZADA && Number.isFinite(fechaEvento) && fechaEvento <= ahora;
 
   return (
     <View style={[ui.card, { borderLeftWidth: 5, borderLeftColor: visual.color }]}>
@@ -53,7 +55,7 @@ export default function CompraItem({ compra, onPagar, onCancelar, onChat, onCali
         {(compra.estado === ESTADO.PENDIENTE || compra.estado === ESTADO.CONFIRMADA) && (
           <Boton icono="close-circle-outline" texto={compra.estado === ESTADO.CONFIRMADA ? 'Cancelar y reembolsar' : 'Cancelar'} onPress={onCancelar} estilo={ui.botonPeligro} />
         )}
-        {compra.estado === ESTADO.UTILIZADA && <Boton icono="star-outline" texto="Calificar" onPress={onCalificar} />}
+        {puedeCalificar && <Boton icono="star-outline" texto="Calificar" onPress={onCalificar} />}
         <Boton icono="chatbubbles-outline" texto="Chat" onPress={onChat} estilo={{ backgroundColor: '#475569' }} />
       </View>
     </View>

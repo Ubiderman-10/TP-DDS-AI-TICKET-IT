@@ -58,10 +58,14 @@ export default function CrearEventoScreen({ navigation }) {
   const crear = async () => {
     const fechaEvento = fecha;
     if (!nombre.trim() || !descripcion.trim()) return Alert.alert('Atención', 'Completá nombre y descripción');
-    if (fechaEvento < new Date()) return Alert.alert('Atención', 'La fecha tiene que ser futura');
+    if (fechaEvento.getTime() <= Date.now()) return Alert.alert('Atención', 'La fecha tiene que ser futura');
     if (!categoriaId) return Alert.alert('Atención', 'Elegí una categoría');
-    if (tipos.some((t) => !t.nombre.trim() || !t.descripcion.trim() || !(Number(t.precio) > 0) || !(Number(t.cupo) > 0))) {
-      return Alert.alert('Atención', 'Cada tipo de entrada necesita nombre, descripción, precio y cupo mayores a 0');
+    if (tipos.some((t) => {
+      const precio = Number(t.precio);
+      const cupo = Number(t.cupo);
+      return !t.nombre.trim() || !t.descripcion.trim() || !Number.isFinite(precio) || precio <= 0 || !Number.isInteger(cupo) || cupo <= 0;
+    })) {
+      return Alert.alert('Atención', 'Cada tipo necesita nombre, descripción, precio mayor a 0 y cupo entero mayor a 0');
     }
 
     setEnviando(true);
@@ -139,7 +143,7 @@ export default function CrearEventoScreen({ navigation }) {
           <TextInput style={ui.input} value={t.nombre} onChangeText={(v) => cambiarTipo(i, 'nombre', v)} placeholder="Nombre (General, VIP...)" />
           <TextInput style={[ui.input, { marginTop: 8 }]} value={t.descripcion} onChangeText={(v) => cambiarTipo(i, 'descripcion', v)} placeholder="Descripción" />
           <View style={[ui.fila, { marginTop: 8 }]}>
-            <TextInput style={[ui.input, { flex: 1, marginRight: 8 }]} value={t.precio} onChangeText={(v) => cambiarTipo(i, 'precio', v)} placeholder="Precio" keyboardType="numeric" />
+            <TextInput style={[ui.input, { flex: 1, marginRight: 8 }]} value={t.precio} onChangeText={(v) => cambiarTipo(i, 'precio', v)} placeholder="Precio" keyboardType="decimal-pad" />
             <TextInput style={[ui.input, { flex: 1 }]} value={t.cupo} onChangeText={(v) => cambiarTipo(i, 'cupo', v)} placeholder="Cupo" keyboardType="numeric" />
           </View>
           {tipos.length > 1 && (
