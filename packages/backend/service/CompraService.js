@@ -73,6 +73,9 @@ export class CompraService {
         if (!tipo) {
             throw new NotFoundError('Tipo de entrada no encontrado');
         }
+        if (!evento.tiposEntrada.some((t) => t.id === tipoEntradaId)) {
+            throw new ValidationError('El tipo de entrada no pertenece al evento');
+        }
         if (cantidad <= 0) {
             throw new ValidationError('La cantidad debe ser mayor a 0');
         }

@@ -17,6 +17,7 @@ import { EstadoCompra } from '../../domain/EstadoCompra.js';
 import { RolUsuario } from '../../domain/RolUsuario.js';
 import { AuthorizationError } from '../../errors/AuthorizationError.js';
 import { BusinessRuleError } from '../../errors/BusinessRuleError.js';
+import { ValidationError } from '../../errors/ValidationError.js';
 
 // Arma todo el sistema en memoria, igual que app.js, con un organizador, un comprador y un tercero.
 function entorno() {
@@ -163,6 +164,18 @@ test('CompraService: no se puede comprar mas que el cupo disponible', () => {
     compraService.comprar(comprador.id, evento.id, tipo.id, 8);
     assert.throws(() => compraService.comprar(tercero.id, evento.id, tipo.id, 3), BusinessRuleError);
     assert.ok(compraService.comprar(tercero.id, evento.id, tipo.id, 2));
+});
+
+test('CompraService: el tipo de entrada tiene que pertenecer al evento que se compra', () => {
+    const { eventoService, compraService, comprador, organizador, evento, categoria } = entorno();
+    const otro = eventoService.crearEvento(
+        { nombre: 'Otro', descripcion: 'd', fecha: new Date(Date.now() + 86400000).toISOString(), multimedia: [] },
+        organizador.id,
+        categoria.id,
+        [{ nombre: 'VIP', descripcion: 'v', precio: 9000, cupo: 5 }]
+    );
+    const tipoDelOtro = otro.tiposEntrada[0];
+    assert.throws(() => compraService.comprar(comprador.id, evento.id, tipoDelOtro.id, 1), ValidationError);
 });
 
 // ---------- Chat ----------
